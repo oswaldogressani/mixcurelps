@@ -1,0 +1,33 @@
+#' Object resulting from simulating survival data with a cure fraction.
+#'
+#' A list of objects resulting from the \link{simdatmixcure} routine.
+#'
+#' @return Values:
+#'
+#' \item{n}{The sample size.}
+#' \item{X}{The generated matrix of covariates in the incidence part (including
+#'  an intercept). As the model includes an intercep, the first column
+#'  corresponds to a column of ones.}
+#' \item{Z}{The generated matrix of covariates in the latency part.}
+#' \item{betas}{The vector of regression coefficients in the incidence part.}
+#' \item{gammas}{The vector of regression coefficents in the latency part.}
+#' \item{tobs}{The vector of observed survival times.}
+#' \item{delta}{The vector of event indicators.}
+#' \item{h0}{A function corresponding to the Weibull baseline hazard used in
+#'  the latency part.}
+#' \item{S0}{A function corresponding to the Weibull baseline survival used in
+#'  the latency part.}
+#' \item{tup}{The largest observed follow-up time.}
+#' \item{fitKM}{The Kaplan-Meier fit to the generated survival data.}
+#' \item{plateau}{The x-axis value at which the plateau of the Kaplan-Meier
+#' curve starts.}
+#' \item{info}{A character string giving information on censoring and
+#' cure rates.}
+#' \item{setting}{The chosen setting, either 1 or 2.}
+#'
+#' @seealso \link{simdatmixcure}
+#'
+#' @author Oswaldo Gressani \email{oswado_gressani@hotmail.fr} .
+#'
+#' @name simdatmixcure.object
+NULL

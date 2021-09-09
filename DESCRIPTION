@@ -1,0 +1,24 @@
+Package: mixcurelps
+Type: Package
+Title: Approximate Bayesian Inference in Mixture Cure Models
+Version: 0.1.1
+Depends: R (>= 4.1)
+Authors@R: person("Oswaldo","Gressani", 
+  email="oswaldo_gressani@hotmail.fr", role=c("aut","cre"))
+Maintainer: Oswaldo Gressani <oswaldo_gressani@hotmail.fr>
+Description: This package implements Laplace approximations and P-splines for
+  fast approximate Bayesian inference in mixture cure models.
+License: file LICENSE
+Encoding: UTF-8
+Imports: 
+    Rcpp (>= 1.0.7),
+    survival  (>= 3.2-11),
+    ggplot2   (>= 3.3.5),
+    progress  (>= 1.2.2),
+    crayon    (>= 1.4.1),
+    survminer (>= 0.4.3)
+LazyData: true
+RoxygenNote: 7.1.1
+LinkingTo: 
+    RcppArmadillo,
+    Rcpp
