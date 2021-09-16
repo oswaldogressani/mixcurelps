@@ -4,7 +4,7 @@
 \alias{lpsmc}
 \title{Fit a mixture cure model with Laplacian-P-splines}
 \usage{
-lpsmc(formula, data, K = 15, penorder = 3, stepsize = 0.2)
+lpsmc(formula, data, K = 15, penorder = 3, stepsize = 0.2, deltaprior = 1e-04)
 }
 \arguments{
 \item{formula}{A model formula of the form \code{Surv(tobs,delta)~
@@ -17,6 +17,9 @@ inci()+late()}.}
 \item{penorder}{The order of the penalty.}
 
 \item{stepsize}{The stepsize taken to maximize the log posterior penalty.}
+
+\item{deltaprior}{The parameters of the Gamma prior for the dispersion
+parameter.}
 }
 \value{
 An object of class \code{lpsmc}.

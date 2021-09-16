@@ -92,7 +92,7 @@ survcurve <- function(x, type=c("baseline","uncured"), covarprofile=NULL,
                      themeval +
                        ggplot2::xlab("t") +
                          ggplot2::ylab(expression(S[0](t))) +
-              ggplot2:: theme(axis.title.x = ggplot2::element_text(size = 14),
+              ggplot2::theme(axis.title.x = ggplot2::element_text(size = 14),
                   axis.title.y = ggplot2::element_text(size = 14),
                   axis.text.x = ggplot2::element_text(size=12),
                   axis.text.y = ggplot2::element_text(size=12)) +
@@ -105,6 +105,7 @@ survcurve <- function(x, type=c("baseline","uncured"), covarprofile=NULL,
                   S0CIlow = S0CIlow)
 
   S0plot # display plot
+  return(outlist)
 
   } else if(plot_type=="uncured"){
 
@@ -182,23 +183,6 @@ survcurve <- function(x, type=c("baseline","uncured"), covarprofile=NULL,
 
   suppressWarnings(print(Suplot))
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

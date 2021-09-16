@@ -1,0 +1,10 @@
+cff-version: 0.1.1
+message: "If you use this package, please cite it as below."
+authors:
+- family-names: "Gressani"
+  given-names: "Oswaldo"
+  orcid: "https://orcid.org/0000-0003-4152-6159"
+title: "A package for approximate Bayesian inference in mixture cure models with Laplacian-P-splines"
+version: 0.1.1
+date-released: 2021-09-09
+url: "https://github.com/oswaldogressani/mixcurelps"

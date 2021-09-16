@@ -11,6 +11,8 @@
 #' @param K The number of B-spline coefficients.
 #' @param penorder The order of the penalty.
 #' @param stepsize The stepsize taken to maximize the log posterior penalty.
+#' @param deltaprior The parameters of the Gamma prior for the dispersion
+#'  parameter.
 #'
 #' @return An object of class \code{lpsmc}.
 #'
@@ -34,7 +36,8 @@
 #'
 #' @export
 
-lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2){
+lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
+                  deltaprior = 1e-04){
 
   #--- Start clock
   tic <- proc.time()
@@ -112,8 +115,8 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2){
   P <- t(D) %*% D                    # Penalty matrix of dimension K-1 by K-1
   P <- P + diag(1e-06,K)             # Diagonal perturbation to make P full rank
   prec_betagamma <- 1e-06            # Prior precision for the regression coeffs.
-  a_delta <- 1e-04                   # Prior for delta
-  b_delta <- 1e-04                   # Prior for delta
+  a_delta <- deltaprior              # Prior for delta
+  b_delta <- a_delta                 # Prior for delta
   nu <- 3                            # Prior for lambda
 
   # Precision matrix
