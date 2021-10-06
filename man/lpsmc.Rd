@@ -10,7 +10,7 @@ lpsmc(formula, data, K = 15, penorder = 3, stepsize = 0.2, deltaprior = 1e-04)
 \item{formula}{A model formula of the form \code{Surv(tobs,delta)~
 inci()+late()}.}
 
-\item{data}{A data frame (optional).}
+\item{data}{A data frame.}
 
 \item{K}{The number of B-spline coefficients.}
 
@@ -28,7 +28,12 @@ An object of class \code{lpsmc}.
 This routine fits a mixture cure model with a logistic link function for
 the incidence part and a flexible Cox proportional hazards model for the
 latency part where the baseline survival is approximated with penalized
- B-splines.
+B-splines. Laplace approximations are used to approximate the conditional
+posterior distribution of the latent vector. A robust prior specification is
+imposed on the roughness penalty parameter following Jullion and Lambert
+(2007). The roughness penalty parameter is optimized and a maximum a
+posteriori estimate is returned. The routine computes point estimates and
+credible intervals for the latent parameters.
 }
 \examples{
 ### Real data application ECOG e1684 clinical trial
@@ -44,6 +49,12 @@ formula <- Surv(tobs, delta) ~ inci(AGE + ER) + late(AGE + ER)
 fitcancer <- lpsmc(formula = formula, data = breastcancer, K = 20)
 fitcancer
 
+}
+\references{
+Jullion, A. and Lambert, P. (2007). Robust specification of the
+ roughness penalty prior distribution in spatially adaptive Bayesian
+ P-splines models. \emph{Computational Statistical & Data Analysis}
+ \strong{51} (5), 2542-2558.\url{https://doi.org/10.1016/j.csda.2006.09.027}
 }
 \seealso{
 \link{lpsmc.object}

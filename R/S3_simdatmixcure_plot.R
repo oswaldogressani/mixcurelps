@@ -53,8 +53,4 @@ plot.simdatmixcure <- function(x, ...) {
 
   plotsurv
 
-
-
-
-
 }

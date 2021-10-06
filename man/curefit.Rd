@@ -17,7 +17,7 @@ A table with the estimated cure proportion.
 }
 \description{
 Computes the estimated cure proportion based on a mixture cure model fit
-with \code{lpsmc}. Both estimates and approximate 90% and 95% credible
+with \code{lpsmc}. Point estimates and approximate 90% and 95% credible
 intervals are shown.
 }
 \examples{
@@ -27,7 +27,7 @@ data("breastcancer")
 formula <- Surv(tobs, delta) ~ inci(AGE + ER) + late(AGE + ER)
 fitcancer <- lpsmc(formula = formula, data = breastcancer, K = 20)
 covarprofile <- matrix(c(1, 30, 1, 1, 40, 0), nrow = 2 , byrow = TRUE)
-fitcure <- curefit(fitcancer,covarprofile)
+fitcure <- curefit(fitcancer, covarprofile)
 fitcure$estimcure
 
 }

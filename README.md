@@ -3,7 +3,7 @@ The mixcurelps package
 
 <!-- Introduce badges -->
 
-![Version](https://img.shields.io/badge/Version-0.1.1-lightgrey)
+![Version](https://img.shields.io/badge/Version-1.1.1-lightgrey)
 ![Languages](https://img.shields.io/badge/Languages-R%2C%20C%2B%2B-informational)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-yellow)
 
@@ -27,12 +27,24 @@ approximated by penalized cubic B-splines [(Eilers and Marx,
 The approximate Bayesian inference methodology is governed by Laplace
 approximations to the conditional posterior of latent variables. The
 penalty parameter associated with P-splines is optimized and the maximum
-*a posteriori* argument is considered. B-spline matrices and the Laplace
-approximation subroutines are coded in C++ and integrated in R via the
-[Rcpp package](http://www.rcpp.org/), so that the code is highly
-efficient and computational times shrinked to seconds. The method is
+*a posteriori* argument is considered. The prior of the roughness
+penalty parameter is Gamma distributed with an additional (dispersion)
+parameter for which a Gamma hyperprior is specified [(Jullion and
+Lambert, 2007)](https://doi.org/10.1016/j.csda.2006.09.027). B-spline
+matrices and the Laplace approximation subroutines are coded in C++ and
+integrated in R via the [Rcpp package](http://www.rcpp.org/), so that
+the code is highly efficient and computational times shrinked to
+seconds. The Laplacian-P-splines mixture cure (LPSMC) methodology is
 entirely sampling-free and outperforms classic MCMC approaches from a
 computational perspective.
+
+  
+
+The package also includes a fully stochastic Bayesian inference approach
+based on a Metropolis-Langevin-within-Gibbs (MLWG) algorithm to sample
+from the joint posterior. The user is thus able to choose between a
+fully sampling-free approach (via Laplace approximations) or a fully
+stochastic approach (via MCMC) for inference in the mixture cure model.
 
   
 
@@ -49,8 +61,6 @@ routine, the user can do a variety of things among which:
 -   Plot the posterior of the (log) penalty parameter.
 -   Plot baseline survival curves and survival curves of uncured
     subjects.
--   Implement simulations to assess the statistical performance of the
-    method.
 
 This version is unstable and there is still room to further improve the
 routines.
@@ -66,7 +76,7 @@ install.packages("devtools")
 devtools::install_github("oswaldogressani/mixcurelps")
 ```
 
-Then load the package.
+Then, load the package.
 
 ``` r
 library("mixcurelps")
@@ -88,6 +98,8 @@ plot(simul)
 ```
 
 <img src="man/figures/simulex-1.png" style="display: block; margin: auto;" />
+
+<br>
 
 To fit a mixture cure model with Laplacian-P-splines, the `lpsmc()`
 routine is used. The first argument is a formula taking the observed
@@ -122,7 +134,7 @@ fit
     ## z1   -0.176  0.085    -0.317   -0.036    -0.343   -0.009
     ## z2    0.461  0.154     0.208    0.714     0.160    0.762
     ## ------------------------------------------------------------------------------------------ 
-    ## 'Real' elapsed time: 0.65 seconds.
+    ## 'Real' elapsed time: 0.63 seconds.
 
 The table above shows the pointwise estimates, posterior standard
 deviation and credible intervals for the regression parameters in the
@@ -187,10 +199,78 @@ The estimated baseline survival curve can be obtained with the
 credible level.
 
 ``` r
-survcurve(fit, cred.int = 0.95)
+fitS0 <- survcurve(fit, cred.int = 0.95, outlisted = TRUE)
+fitS0$S0plot
 ```
 
 <img src="man/figures/base-1.png" style="display: block; margin: auto;" />
+
+## Metropolis-Langevin-within-Gibbs
+
+To fit the mixture cure model with the Metropolis-Langevin-within-Gibbs
+sampler, the `LangevinGibbs()` routine is used. Here, we specify a chain
+of length 15,000 and a warm-up period (burn-in) of 5,000. Of course, the
+Metropolis-Langevin-within-Gibbs sampler is computationally more
+demanding than the fully sampling-free Laplacian-P-splines approach.
+
+``` r
+fitMLWG <- LangevinGibbs(formula, data = simdat , K = 12, mcmcsample = 15000,
+                         burnin = 5000)
+fitMLWG
+```
+
+    ## Fitting mixture cure model with Langevin-Gibbs sampler 
+    ## ------------------------------------------------------- 
+    ## Sample size:  400 
+    ## No. of B-splines:  12 
+    ## ------------------------------------------------------------------------------------------ 
+    ##                                   (Incidence)                    
+    ## ------------------------------------------------------------------------------------------ 
+    ##             Estimate     sd CI90%.low CI90.up% CI95%.low CI95%.up
+    ## (Intercept)    0.777  0.230     0.412    1.155     0.336    1.248
+    ## x1            -1.347  0.224    -1.727   -1.001    -1.834   -0.942
+    ## x2             1.146  0.368     0.531    1.772     0.427    1.854
+    ## ------------------------------------------------------------------------------------------ 
+    ##                                    (Latency)                     
+    ## ------------------------------------------------------------------------------------------ 
+    ##    Estimate     sd CI90%.low CI90.up% CI95%.low CI95%.up
+    ## z1   -0.177  0.086    -0.316   -0.034    -0.340   -0.004
+    ## z2    0.463  0.157     0.202    0.717     0.133    0.766
+    ## ------------------------------------------------------------------------------------------ 
+    ## 'Real' elapsed time: 37.18 seconds
+    ## MCMC chain length: 15000
+    ## Burn-in length: 5000
+    ## MCMC acceptance rate: 56.08%.
+
+To get the traceplots of the regression coefficients of the incidence
+part (and the roughness penalty parameter), type the following lines:
+
+``` r
+gridExtra::grid.arrange(plot(fitMLWG, param="beta0"),
+                        plot(fitMLWG, param="beta1"),
+                        plot(fitMLWG, param="beta2"), 
+                        plot(fitMLWG, param="lambda",tracecol = "red"),
+                        nrow = 2, ncol = 2)
+```
+
+<img src="man/figures/traceplots-1.png" style="display: block; margin: auto;" />
+
+  
+
+To check that the generated chains have converged, we look at the Geweke
+diagnostics of the latent variables (and the hyperparameters). Here in
+total, we have 18 blue points (11 B-splines plus 5 regression
+coefficients plus 2 hyperparameters). All of the Geweke z-scores are
+within the ( − 1.96, 1.96) range (red dotted horizontal lines), which is
+a good sign of convergence.
+
+``` r
+plot(fitMLWG$Geweke,type="p", pch=8, col="blue", ylim=c(-2.5,2.5),
+     ylab="Geweke z-scores")
+abline(h=c(-1.96,1.96),lty=2,col="red",lwd=2)
+```
+
+<img src="man/figures/Geweke-1.png" style="display: block; margin: auto;" />
 
 ## Simulations
 
@@ -205,7 +285,7 @@ summarizes the simulations.
 ``` r
 S <- 500
 set.seed(14778)
-sims <- simlpsmc(n = 300, scenario = 1, S = S, themetype = "gray")
+sims <- simlpsmc(n = 300, scenario = 1, S = S, themetype = "classic")
 ```
 
     ## -------------------------------------------------- 
@@ -226,16 +306,16 @@ sims <- simlpsmc(n = 300, scenario = 1, S = S, themetype = "gray")
     ## Estimated coverage probabilities of S0 at selected quantiles 
     ## ----------------------------------------------------------------- 
     ##       t0.05 t0.1 t0.2 t0.3 t0.4 t0.5 t0.6 t0.7 t0.8 t0.9
-    ## CP90%  83.4 90.6 86.4 86.6 85.8 90.2 91.6 91.2 86.6 48.0
-    ## CP95%  91.2 95.0 94.4 93.0 93.8 96.2 96.6 95.6 94.0 63.8
+    ## CP90%  75.4 84.4 86.4 86.6 85.8 90.2 91.6 91.2 76.4 32.8
+    ## CP95%  82.2 89.2 94.4 93.0 93.8 96.2 96.6 95.6 85.2 46.4
     ## ------------------------------------------------------------------------------------------ 
     ## Estimated coverage probabilities of S(uncured) for z=(0,0.4) 
     ## ----------------------------------------------------------------- 
     ##       t0.05 t0.1 t0.2 t0.3 t0.4 t0.5 t0.6 t0.7 t0.8 t0.9
-    ## CP90%  89.2 94.0 89.0 87.8 87.0 91.0 93.2 89.6 83.4 30.2
-    ## CP95%  94.2 98.2 93.6 94.0 94.8 97.0 97.6 93.6 92.6 49.0
+    ## CP90%  78.8 88.2 89.0 87.8 87.0 91.0 93.2 89.6 72.0 18.6
+    ## CP95%  87.6 93.0 93.6 94.0 94.8 97.0 97.6 93.6 82.0 27.4
     ## ------------------------------------------------------------------------------------------ 
-    ## Total elapsed time: 221.98 seconds.
+    ## Total elapsed time: 208.64 seconds.
 
 The above table shows the simulation results associated with the
 regression coefficients (table on top) and also the estimated (90% and
@@ -243,8 +323,8 @@ regression coefficients (table on top) and also the estimated (90% and
 survival curve of the uncured respectively at selected quantiles.
 Dividing the total elapsed time by the number of replications allows to
 assess the average time required by the `lpsmc()` routine to fit the
-model (here 0.444 seconds). To show the simulation results associated
-with the regression coefficients only in a clean table:
+model (here 0.417 seconds). To show the simulation results associated
+with the regression coefficients in a clean table:
 
 ``` r
 knitr::kable(sims$simulres, digits = 3)
@@ -272,17 +352,26 @@ gridExtra::grid.arrange(sims$S0plot, sims$ASEplot, nrow = 1)
 
 ## Package version
 
-This is version 0.1.1 (2021-09-09) – “Keeping CPU at low temperature”.
+This is version 1.1.1 (2021-10-06) – “MCMC kicks in”.
 
 ## License
 
 Copyright © 2021 Oswaldo Gressani. All rights reserved.
 
-## Reference
+## References
 
 Gressani, O., Faes, C. and Hens, N. (2021). Laplacian P-splines for
 Bayesian inference in the mixture cure model. ArXiv preprint.
 arxiv.org/abs/2103.01526
+
+Eilers, P.H.C. and Marx, B.D. (1996). Flexible smoothing with B-splines
+and penalties. *Statistical Science*, 11(2), 89-121.
+<https://doi.org/10.1214/ss/1038425655>
+
+Jullion, A., and Lambert, P. (2007). Robust specification of the
+roughness penalty prior distribution in spatially adaptive Bayesian
+P-splines models. *Computational Statistics & Data Analysis*, 51(5),
+2542-2558. <https://doi.org/10.1016/j.csda.2006.09.027>
 
 ## Acknowledgments
 

@@ -2,13 +2,17 @@
 #'
 #'
 #' @description
-#' Simulates the lpsmc function
+#' This routine can be used to assess the statistical performance of the
+#' \code{lpsmc} routine in a simulation setting. The scenario (1 or 2)
+#' determines the data generating process and the total number of replications
+#' can be fixed by the user.
 #'
 #' @param n Sample size.
 #' @param K Number of B-spline basis functions.
 #' @param scenario Either 1 or 2.
 #' @param S Total number of replications.
 #' @param exactrep Exactly replicate results.
+#' @param simnum A seed for reproducibility.
 #' @param themetype The theme of the plot either "classic", "gray","light"
 #'  or "dark".
 #'
@@ -23,6 +27,7 @@
 #' @export
 
 simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
+                     simnum = NULL,
                      themetype = c("classic","gray","light","dark")){
 
   themetype <- match.arg(themetype)
@@ -61,6 +66,10 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
   Sucover90 <- matrix(0, nrow = S, ncol = length(pvec)) # For 90% coverage of Su
   Sucover95 <- matrix(0, nrow = S, ncol = length(pvec)) # For 95% coverage of Su
   ASEpvec <- c()
+  coverageincid90 <- c()
+  coverageincid95 <- c()
+  covercure90 <- c()
+  covercure95 <- c()
 
   if(scenario == 1){
     betas_true  <- c(0.70,-1.15, 0.95)
@@ -83,7 +92,12 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
 
   tic <- proc.time() #start clock
 
+  if(!is.null(simnum)){
+    set.seed(simnum)
+  }
+
   for (s in 1:S) {
+
     # Generate survival data from mixture cure model
     simdat <- simdatmixcure(n = n, wshape = 1.45, wscale = 0.25,
                             setting = scenario)
@@ -110,6 +124,23 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
         regcoeffs_true[j] <= CI95[j, 2]
     }
 
+    # Compute coverage probability of incidence p(x)
+    xmean_true <- c(1, 0, 0.5)
+
+    # True incidence at mean covariate vector x
+    p_meancovar <- fitlpsmc$px(simdat$betas,xmean_true)
+    coverageincid90[s] <- as.numeric(p_meancovar >= fitlpsmc$CIincid90[1] &&
+                                    p_meancovar <= fitlpsmc$CIincid90[2])
+    coverageincid95[s] <- as.numeric(p_meancovar >= fitlpsmc$CIincid95[1] &&
+                                    p_meancovar <= fitlpsmc$CIincid95[2])
+
+
+    # Compute coverage probability of cure rate 1-p(x)
+    pcure <- 1-p_meancovar
+    covercure90[s] <- as.numeric(pcure >= fitlpsmc$CIcure90[1] &&
+                                   pcure <= fitlpsmc$CIcure90[2])
+    covercure95[s] <- as.numeric(pcure >= fitlpsmc$CIcure95[1] &&
+                                   pcure <= fitlpsmc$CIcure95[2])
 
     # Compute coverage probabilities for baseline survival at selected quantiles
 
@@ -121,8 +152,6 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
 
     tq <- sapply(pvec, quantileS0)
     S0tq <- sapply(tq, simdat$S0)
-    tqbounds <- rev(tq[c(utils::tail(which(pvec < 0.20), 1),
-                         utils::head(which(pvec > 0.70), 1))])
 
     # Function for CI for S0 at t
     S0CI <- function(t, alpha, thetahat){
@@ -133,12 +162,6 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
       Sig_thetahat <- fitlpsmc$Covhat[1:(K-1), 1:(K-1)]
       qz_alpha  <- stats::qnorm(alpha * 0.5, lower.tail = FALSE)
       post_sd <- sqrt(as.numeric(t(grad_g) %*% Sig_thetahat %*% grad_g))
-      if(t<=tqbounds[1] || t>=tqbounds[2]){
-        dfStud <- 10
-        qz_alpha  <- stats::qt(alpha * 0.5, df = dfStud, lower.tail = FALSE)
-        post_sd <- sqrt((dfStud/(dfStud-2)) *
-                          as.numeric(t(grad_g) %*% Sig_thetahat %*% grad_g))
-      }
       CI_g <- c(gstar - qz_alpha * post_sd, gstar + qz_alpha * post_sd)
       CIS <- rev(exp(-exp(CI_g)))
       return(CIS)
@@ -162,7 +185,7 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
 
     zprofile <- c(0, 0.4)
 
-    ## Inverse of survival for uncured to find quantiles of interest tq
+    ## Inverse of survival for uncured to find quantiles of interest tqq
     quantileSu <- function(p) {
       val <- ((-1 / (simdat$wscale*exp(as.numeric(zprofile%*%simdat$gammas))))
               * log(p)) ^ (1 / simdat$wshape)
@@ -171,8 +194,6 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
 
     tqq <- sapply(pvec, quantileSu)
     Sutq <- sapply(tqq, simdat$S0)^(exp(as.numeric(zprofile%*%simdat$gammas)))
-    tqqbounds <- rev(tqq[c(utils::tail(which(pvec < 0.20), 1),
-                           utils::head(which(pvec > 0.70), 1))])
 
     SuCI <- function(t, alpha, thetahat){
       cum_tt <- fitlpsmc$cumult(t = t, theta = thetahat, k = 0, l = 0)
@@ -189,12 +210,6 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
       SSighat[K:(K+1),K:(K+1)] <- fitlpsmc$Covhat[(K + p + 1):dimlat, (K + p + 1):dimlat]
       qz_alpha  <- stats::qnorm(alpha * 0.5, lower.tail = FALSE)
       post_sd <- sqrt(as.numeric(t(grad_g) %*% SSighat %*% grad_g))
-      if(t<=tqqbounds[1] || t>=tqqbounds[2]){
-        dfStud <- 10
-        qz_alpha  <- stats::qt(alpha * 0.5, df = dfStud, lower.tail = FALSE)
-        post_sd <- sqrt((dfStud/(dfStud-2)) *
-                          as.numeric(t(grad_g) %*% SSighat %*% grad_g))
-      }
       CI_g <- c(gstar - qz_alpha * post_sd, gstar + qz_alpha * post_sd)
       CIS <- rev(exp(-exp(CI_g)))
       return(CIS)
@@ -301,7 +316,7 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
         text = paste(
           "ggplot2::geom_line(ggplot2::aes(y=",
           S0colnames[s],
-          "),colour='#8564DF')",
+          "),colour='#c1cad7')",
           sep = ""
         )
       ))
@@ -369,6 +384,12 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
                    plot.title = ggplot2::element_text(hjust = 0.5, size = 15))
 
 
+  # Compute coverage of incidence and cure
+  CI90_incidence <- round(mean(coverageincid90) * 100, 2)
+  CI95_incidence <- round(mean(coverageincid95) * 100, 2)
+  CI90_cure <- round(mean(covercure90) * 100, 2)
+  CI95_cure <- round(mean(covercure95) * 100, 2)
+
 
   # Print on screen
   cat(paste(rep("-",50),collapse = ""),"\n")
@@ -391,15 +412,16 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
   cat(paste(rep("-",90),collapse = ""),"\n")
   cat(paste0("Total elapsed time: ",toc, " seconds.\n"))
 
-
-
-
   outlist <- list(simulres = simulres,
                   S0plot = S0baseplot,
                   ASEplot = ASEplot,
                   ASEpvec = ASEpvec,
                   S0coverage = baselinecoverage,
                   Sucoverage = Sucoverage,
+                  cover_inci90 = CI90_incidence,
+                  cover_inci95 = CI95_incidence,
+                  cover_cure90 = CI90_cure,
+                  cover_cure95 = CI95_cure,
                   elapsed = toc)
 
 }

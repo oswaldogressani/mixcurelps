@@ -5,7 +5,7 @@
 #' @return
 #'
 #' \item{X}{The matrix of covariates in the incidence part (including
-#'  an intercept). As the model includes an intercep, the first column
+#'  an intercept). As the model includes an intercept, the first column
 #'  corresponds to a column of ones.}
 #' \item{Z}{The matrix of covariates in the latency part.}
 #' \item{latenthat}{The vector of estimated latent variables. This includes

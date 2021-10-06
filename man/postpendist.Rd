@@ -7,7 +7,7 @@
 postpendist(x, low, up, themetype = c("classic", "gray", "light", "dark"))
 }
 \arguments{
-\item{x}{An object of class \code{lpsmc}}
+\item{x}{An object of class \code{lpsmc}.}
 
 \item{low}{The lower bound on the x-axis (in log scale).}
 

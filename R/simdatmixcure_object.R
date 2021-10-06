@@ -6,7 +6,7 @@
 #'
 #' \item{n}{The sample size.}
 #' \item{X}{The generated matrix of covariates in the incidence part (including
-#'  an intercept). As the model includes an intercep, the first column
+#'  an intercept). As the model includes an intercept, the first column
 #'  corresponds to a column of ones.}
 #' \item{Z}{The generated matrix of covariates in the latency part.}
 #' \item{betas}{The vector of regression coefficients in the incidence part.}

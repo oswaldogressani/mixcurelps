@@ -9,7 +9,8 @@ survcurve(
   type = c("baseline", "uncured"),
   covarprofile = NULL,
   cred.int = 0.95,
-  themetype = c("classic", "gray", "light", "dark")
+  themetype = c("classic", "gray", "light", "dark"),
+  outlisted = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ survcurve(
 
 \item{themetype}{The theme of the plot either "classic", "gray","light"
 or "dark".}
+
+\item{outlisted}{Should a list be produced as an output?}
 }
 \description{
 This routine creates objects related to the baseline survival

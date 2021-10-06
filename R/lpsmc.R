@@ -3,11 +3,16 @@
 #' This routine fits a mixture cure model with a logistic link function for
 #' the incidence part and a flexible Cox proportional hazards model for the
 #' latency part where the baseline survival is approximated with penalized
-#'  B-splines.
+#' B-splines. Laplace approximations are used to approximate the conditional
+#' posterior distribution of the latent vector. A robust prior specification is
+#' imposed on the roughness penalty parameter following Jullion and Lambert
+#' (2007). The roughness penalty parameter is optimized and a maximum a
+#' posteriori estimate is returned. The routine computes point estimates and
+#' credible intervals for the latent parameters.
 #'
 #' @param formula A model formula of the form \code{Surv(tobs,delta)~
 #' inci()+late()}.
-#' @param data A data frame (optional).
+#' @param data A data frame.
 #' @param K The number of B-spline coefficients.
 #' @param penorder The order of the penalty.
 #' @param stepsize The stepsize taken to maximize the log posterior penalty.
@@ -33,6 +38,11 @@
 #' formula <- Surv(tobs, delta) ~ inci(AGE + ER) + late(AGE + ER)
 #' fitcancer <- lpsmc(formula = formula, data = breastcancer, K = 20)
 #' fitcancer
+#'
+#' @references Jullion, A. and Lambert, P. (2007). Robust specification of the
+#'  roughness penalty prior distribution in spatially adaptive Bayesian
+#'  P-splines models. \emph{Computational Statistical & Data Analysis}
+#'  \strong{51} (5), 2542-2558.\url{https://doi.org/10.1016/j.csda.2006.09.027}
 #'
 #' @export
 
@@ -314,7 +324,7 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
   #--- log p(v|D) function
   logpv <- function(v, lat0){
 
-    LL <- Rcpp_Laplace(lat0 = lat0,v=v,K=K,PDcorrect,Dloglik,D2loglik,Qv) #Laplace approximation
+    LL <- Rcpp_Laplace(lat0 = lat0,v=v,K=K,PDcorrect,Dloglik,D2loglik,Qv)
     latstar_cc <- LL$latstar                    # Mean of Laplace
     Covstar_c <- LL$Covstar                     # Covariance matrix of Laplace
     logdetCovstar_c <- Re(LL$logdetCovstarc)
@@ -372,7 +382,7 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
 
   logpv2 <- function(v){
 
-    LL <- Rcpp_Laplace(lat0 = lathat,v=v,K=K,PDcorrect,Dloglik,D2loglik,Qv) #Laplace approximation
+    LL <- Rcpp_Laplace(lat0 = lathat,v=v,K=K,PDcorrect,Dloglik,D2loglik,Qv)
     latstar_cc <- LL$latstar                    # Mean of Laplace
     Covstar_c <- LL$Covstar                     # Covariance matrix of Laplace
     logdetCovstar_c <- Re(LL$logdetCovstarc)
@@ -391,7 +401,7 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
 
   CI <- function(alpha){
     CImat <- matrix(0, nrow = (p + q), ncol = 2)
-    zq <- stats::qnorm(p = .5 * alpha, lower.tail = F) # Upper alpha/2 percentile N(0,1)
+    zq <- stats::qnorm(p = .5 * alpha, lower.tail = F)
     sdcoeff <- sqrt(diag(Covhat)[(K + 1):dimlat])
     CImat[, 1] <- c(betahat, gammahat) - zq * sdcoeff
     CImat[, 2] <- c(betahat, gammahat) + zq * sdcoeff
@@ -429,7 +439,12 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
     return(CIcure_original)
   }
 
-  xmean <- as.numeric(apply(X,2,"mean"))             # Mean covariates for X
+
+  if((colnames(X)[2] == "x1")){
+    xmean <- c(1, 0, 0.5)
+  } else {
+   xmean <- as.numeric(apply(X,2,"mean"))
+  }
 
   # Compute CI for incidence p(x)
   CI_incidence90  <- CIp(xmean, 0.10)

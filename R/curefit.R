@@ -2,7 +2,7 @@
 #'
 #' @description
 #' Computes the estimated cure proportion based on a mixture cure model fit
-#' with \code{lpsmc}. Both estimates and approximate 90% and 95% credible
+#' with \code{lpsmc}. Point estimates and approximate 90% and 95% credible
 #' intervals are shown.
 #'
 #' @param x A lpsmc object.
@@ -20,7 +20,7 @@
 #' formula <- Surv(tobs, delta) ~ inci(AGE + ER) + late(AGE + ER)
 #' fitcancer <- lpsmc(formula = formula, data = breastcancer, K = 20)
 #' covarprofile <- matrix(c(1, 30, 1, 1, 40, 0), nrow = 2 , byrow = TRUE)
-#' fitcure <- curefit(fitcancer,covarprofile)
+#' fitcure <- curefit(fitcancer, covarprofile)
 #' fitcure$estimcure
 #'
 #' @export
@@ -55,13 +55,6 @@ curefit <- function(x, covarprofile){
    CIcuremat[j, (p+2):(p+3)] <- CIcure(covarprofile[j,], 0.10)
    CIcuremat[j, (p+4):(p+5)] <- CIcure(covarprofile[j,], 0.05)
   }
-
-  # cat(paste(rep("-",90),collapse = ""),"\n")
-  # cat("Estimated cure proportion \n")
-  # cat(paste(rep("-",90),collapse = ""),"\n")
-  # print.table(CIcuremat, digits = 3, justify = "left")
-  # cat(paste(rep("-",90),collapse = ""),"\n")
-
 
   outlist <- list(estimcure = CIcuremat)
 

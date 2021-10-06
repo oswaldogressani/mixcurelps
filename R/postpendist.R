@@ -6,7 +6,7 @@
 #' on a an object of class \code{lpsmc}.
 #'
 #'
-#' @param x An object of class \code{lpsmc}
+#' @param x An object of class \code{lpsmc}.
 #' @param low The lower bound on the x-axis (in log scale).
 #' @param up The upper bound on the x-axis (in log scale).
 #' @param themetype The theme, either "classic", "gray", "light" or "dark".

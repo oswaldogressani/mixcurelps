@@ -11,6 +11,7 @@
 #' @param cred.int The level for building the credible intervals.
 #' @param themetype The theme of the plot either "classic", "gray","light"
 #'  or "dark".
+#' @param outlisted Should a list be produced as an output?
 #'
 #' @author Oswaldo Gressani \email{oswaldo_gressani@hotmail.fr} .
 #'
@@ -27,7 +28,8 @@
 
 survcurve <- function(x, type=c("baseline","uncured"), covarprofile=NULL,
                       cred.int = 0.95,
-                      themetype = c("classic","gray","light","dark") ){
+                      themetype = c("classic","gray","light","dark"),
+                      outlisted = FALSE){
 
   themetype <- match.arg(themetype)
   if(themetype == "classic"){
@@ -101,11 +103,12 @@ survcurve <- function(x, type=c("baseline","uncured"), covarprofile=NULL,
 
   outlist <- list(tt = Sdom,
                   S0fit = S0hat,
+                  S0plot = S0plot,
                   S0CIup = S0CIup,
                   S0CIlow = S0CIlow)
 
   S0plot # display plot
-  return(outlist)
+
 
   } else if(plot_type=="uncured"){
 
@@ -134,55 +137,46 @@ survcurve <- function(x, type=c("baseline","uncured"), covarprofile=NULL,
   covarprofile1 <- as.numeric(covarprofile[1, ])
 
   Suhat <- S0hat ^ (exp(as.numeric(covarprofile1 %*% gammahat)))
-  SuCI <- sapply(Sdom, SuCIfun, alpha = 1 - cred.int, covarprofile=covarprofile1)
+  SuCI <- sapply(Sdom, SuCIfun, alpha = 1 - cred.int,
+                 covarprofile = covarprofile1)
+  SuCIlow <- SuCI[1,]
+  SuCIup <- SuCI[2,]
+  xlimup <- Sdom[utils::head(which(Suhat < 1e-6),1)]
+
+  plot(Sdom, Suhat, type = "l", col = "black", ylab="Survival in latency part",
+       xlab="Time (in days)", xlim = c(0, xlimup))
+  graphics::polygon(c(Sdom,rev(Sdom)),c(SuCIlow,rev(SuCIup)),col="gray85",
+                    border = "NA")
+  graphics::lines(Sdom, Suhat, type="l", lwd = 2)
+
+  if(nrow(covarprofile) > 1){
+  covarprofile2 <- as.numeric(covarprofile[2, ])
+
+  Suhat2 <- S0hat ^ (exp(as.numeric(covarprofile2 %*% gammahat)))
+  SuCI <- sapply(Sdom, SuCIfun, alpha = 1 - cred.int,
+                 covarprofile=covarprofile2)
   SuCIlow <- SuCI[1,]
   SuCIup <- SuCI[2,]
 
-  Sudat <- data.frame(Sdom, Suhat, SuCIlow, SuCIup)
-  Sudat[1, 4] <- 1
+  graphics::lines(Sdom, Suhat2, type="l", lty=2, lwd=2)
+  graphics::polygon(c(Sdom,rev(Sdom)),c(SuCIlow,rev(SuCIup)),col="NA",
+          border = "black", lty=2, lwd = 1)
+  }
 
-  # survival plot of uncured
-  Suplot <- ggplot2::ggplot(data = Sudat, ggplot2::aes(x=Sdom, y=Suhat)) +
-              ggplot2::geom_line(colour = "blue", size = 1.1) +
-               themeval +
-                 ggplot2::xlab("t") +
-                   ggplot2::ylab("Survival of uncured group") +
-             ggplot2:: theme(axis.title.x = ggplot2::element_text(size = 14),
-                    axis.title.y = ggplot2::element_text(size = 14),
-                    axis.text.x = ggplot2::element_text(size=12),
-                    axis.text.y = ggplot2::element_text(size=12)) +
-             ggplot2::geom_ribbon(ggplot2::aes(ymin=SuCIlow, ymax=SuCIup),
-                         alpha = 0.15,fill="blue")
-
-  if(nrow(covarprofile) > 1){
-    covarprofile2 <- as.numeric(covarprofile[2, ])
-
-    Suhat2 <- S0hat ^ (exp(as.numeric(covarprofile2 %*% gammahat)))
-    SuCI <- sapply(Sdom, SuCIfun, alpha = 1 - cred.int,
-                   covarprofile=covarprofile2)
-    SuCIlow <- SuCI[1,]
-    SuCIup <- SuCI[2,]
-
-    Sudat2 <- data.frame(Sdom, Suhat2, SuCIlow, SuCIup)
-    Sudat2[1, 4] <- 1
-    xlimup <- Sdom[utils::head(which(Sudat$Suhat < 1e-6),1)]
+  ctitle1 <- paste0(colnames(x$X)[2:x$p], "=", covarprofile1)
+  ctitle1 <- paste(ctitle1[1], ctitle1[2], sep="; ")
+  ctitle2 <- paste0(colnames(x$X)[2:x$p], "=", covarprofile2)
+  ctitle2 <- paste(ctitle2[1], ctitle2[2], sep="; ")
 
 
-    Suplot <- Suplot + ggplot2::geom_line(data = Sudat2,
-      ggplot2::aes(x=Sdom, y=Suhat2, color="green"), size=1.1) +
-
-      ggplot2::geom_ribbon(ggplot2::aes(ymin=Sudat2$SuCIlow,
-                                        ymax=Sudat2$SuCIup),
-                           alpha = 0.15,fill="green") +
-
-      ggplot2::scale_colour_manual(name="Legend",
-                                   values=c("Profile 2"="green")) +
-      ggplot2::xlim(0,xlimup)
+  graphics::legend("topright",c(ctitle1,ctitle2), lty=c(1,2),
+                   col = c("black","black"),
+                    bty="n", lwd = c(2,2))
 
   }
 
-  suppressWarnings(print(Suplot))
+  if(outlisted == TRUE){
+    return(outlist)
   }
-
 
 }

@@ -10,6 +10,7 @@ simlpsmc(
   scenario = 1,
   S = 500,
   exactrep = FALSE,
+  simnum = NULL,
   themetype = c("classic", "gray", "light", "dark")
 )
 }
@@ -24,11 +25,16 @@ simlpsmc(
 
 \item{exactrep}{Exactly replicate results.}
 
+\item{simnum}{A seed for reproducibility.}
+
 \item{themetype}{The theme of the plot either "classic", "gray","light"
 or "dark".}
 }
 \description{
-Simulates the lpsmc function
+This routine can be used to assess the statistical performance of the
+\code{lpsmc} routine in a simulation setting. The scenario (1 or 2)
+determines the data generating process and the total number of replications
+can be fixed by the user.
 }
 \examples{
 ### Scenario 1,  n=300
