@@ -178,7 +178,7 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
                                                    fitmcmc$mcmcsample,]
       matthetagamm[,((K+1):(K+2))] <- fitmcmc$gammachain[(fitmcmc$burnin+1):
                                                    fitmcmc$mcmcsample,]
-      Suchains[,j] <- apply(matthetagamm ,MARGIN = 1, Susurv, t=tqq[j])
+      Suchains[,j] <- apply(matthetagamm, MARGIN = 1, Susurv, t=tqq[j])
     }
 
     CI_Su90 <- apply(Suchains, 2, "quantile", probs = c(0.05, 0.95))
