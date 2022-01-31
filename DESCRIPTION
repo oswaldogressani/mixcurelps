@@ -20,7 +20,7 @@ Imports:
     survminer (>= 0.4.3),
     MASS (>= 7.3-54)
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 LinkingTo: 
     RcppArmadillo,
     Rcpp

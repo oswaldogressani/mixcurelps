@@ -47,6 +47,11 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
   S0cover95 <- matrix(0, nrow = S, ncol = length(pvec)) # For 95% coverage of S0
   Sucover90 <- matrix(0, nrow = S, ncol = length(pvec)) # For 90% coverage of Su
   Sucover95 <- matrix(0, nrow = S, ncol = length(pvec)) # For 95% coverage of Su
+  S090CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+  S095CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+  Su90CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+  Su95CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+  Diff_S0 <- matrix(0, nrow = S, ncol = length(pvec))
   Gewekemat <- matrix(0, nrow = S, ncol = (K+3+2+2-1))
   acceptvec <- c()
 
@@ -141,6 +146,8 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
                           fitmcmc$mcmcsample,],MARGIN = 1, basesurv, t=tq[j])
     }
 
+    Diff_S0[s, ] <- colMeans(S0chains)-S0tq
+
     CI_S090 <- apply(S0chains, 2, "quantile", probs = c(0.05, 0.95))
     CI_S095 <- apply(S0chains, 2, "quantile", probs = c(0.025, 0.975))
 
@@ -148,6 +155,10 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
       S0cover90[s,j] <- pvec[j] >= CI_S090[1,j] && pvec[j] <= CI_S090[2,j]
       S0cover95[s,j] <- pvec[j] >= CI_S095[1,j] && pvec[j] <= CI_S095[2,j]
     }
+
+    # Measuring CI width for baseline survival
+    S090CIwidth[s, ] <- apply(CI_S090, 2, "diff")
+    S095CIwidth[s,] <- apply(CI_S095, 2, "diff")
 
     zprofile <- c(0, 0.4)
 
@@ -188,6 +199,10 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
       Sucover90[s,j] <- pvec[j] >= CI_Su90[1,j] && pvec[j] <= CI_Su90[2,j]
       Sucover95[s,j] <- pvec[j] >= CI_Su95[1,j] && pvec[j] <= CI_Su95[2,j]
     }
+
+    # Measuring CI width for survival of uncured
+    Su90CIwidth[s, ] <- apply(CI_Su90, 2, "diff")
+    Su95CIwidth[s,] <- apply(CI_Su95, 2, "diff")
 
      progbar$tick()
 
@@ -230,6 +245,11 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
     return(RMSEvec)
   }
 
+  # Mean CI width
+  meanS0CI90 <- colMeans(S090CIwidth)
+  meanS0CI95 <- colMeans(S095CIwidth)
+  meanSuCI90 <- colMeans(Su90CIwidth)
+  meanSuCI95 <- colMeans(Su95CIwidth)
 
   # Create output matrix
   simulres <- matrix(0, nrow = 5 , ncol = 8)
@@ -247,6 +267,9 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
                            RMSE(gammamat,gammas_true, S)),3)
   simulres[, 7] <- round(colMeans(coverage90) * 100, 2)
   simulres[, 8] <- round(colMeans(coverage95) * 100, 2)
+
+  # Bias of S0 at selected quantiles
+  Bias_S0 <- colMeans(Diff_S0)
 
   # Compute coverage probabilities for baseline survival
 
@@ -298,7 +321,12 @@ simLangevin <- function(n = 300, K = 15, scenario = 1, S = 500,
                   Sucoverage = Sucoverage,
                   elapsed = toc,
                   Geweke = Gewekemat,
-                  acceptrate = acceptvec)
+                  acceptrate = acceptvec,
+                  meanS0CI90 =  meanS0CI90,
+                  meanS0CI95 = meanS0CI95,
+                  meanSuCI90 = meanSuCI90,
+                  meanSuCI95 = meanSuCI95,
+                  Bias_S0 = Bias_S0)
 
 }
 

@@ -65,6 +65,11 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
   S0cover95 <- matrix(0, nrow = S, ncol = length(pvec)) # For 95% coverage of S0
   Sucover90 <- matrix(0, nrow = S, ncol = length(pvec)) # For 90% coverage of Su
   Sucover95 <- matrix(0, nrow = S, ncol = length(pvec)) # For 95% coverage of Su
+  S090CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+  S095CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+  Su90CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+  Su95CIwidth <- matrix(0, nrow = S, ncol = length(pvec))
+
   ASEpvec <- c()
   coverageincid90 <- c()
   coverageincid95 <- c()
@@ -179,6 +184,9 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
       S0cover95[s,j] <- pvec[j] >= CI_S095[1,j] && pvec[j] <= CI_S095[2,j]
     }
 
+    # Measuring CI width for baseline survival
+    S090CIwidth[s, ] <- apply(CI_S090, 2, "diff")
+    S095CIwidth[s,] <- apply(CI_S095, 2, "diff")
 
     # Compute coverage probabilities for survival of uncured at selected
     # quantiles and for covariate profile z=(0,0.4)
@@ -225,6 +233,10 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
       Sucover95[s,j] <- pvec[j] >= CI_Su95[1,j] && pvec[j] <= CI_Su95[2,j]
     }
 
+    # Measuring CI width for survival of uncured
+    Su90CIwidth[s, ] <- apply(CI_Su90, 2, "diff")
+    Su95CIwidth[s,] <- apply(CI_Su95, 2, "diff")
+
     progbar$tick()
   }
 
@@ -258,6 +270,11 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
     return(RMSEvec)
   }
 
+  # Mean CI width
+  meanS0CI90 <- colMeans(S090CIwidth)
+  meanS0CI95 <- colMeans(S095CIwidth)
+  meanSuCI90 <- colMeans(Su90CIwidth)
+  meanSuCI95 <- colMeans(Su95CIwidth)
 
   # Create output matrix
   simulres <- matrix(0, nrow = 5 , ncol = 8)
@@ -335,6 +352,14 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
                     plot.title = ggplot2::element_text(hjust = 0.5, size = 15),
                     axis.text.x = ggplot2::element_text(size=12),
                     axis.text.y = ggplot2::element_text(size=12))
+
+  # Compute bias of baseline survival at quantiles tq
+
+  Diff_S0 <- matrix(0, nrow = S, ncol = length(pvec))
+  for(s in 1:S){
+    Diff_S0[s, ]<-  sapply(tq, basesurv, thetahat = thetamat[s, ]) - S0tq
+  }
+  Bias_S0 <- colMeans(Diff_S0)
 
   # Compute coverage probabilities for baseline survival
 
@@ -422,6 +447,11 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
                   cover_inci95 = CI95_incidence,
                   cover_cure90 = CI90_cure,
                   cover_cure95 = CI95_cure,
+                  meanS0CI90 =  meanS0CI90,
+                  meanS0CI95 = meanS0CI95,
+                  meanSuCI90 = meanSuCI90,
+                  meanSuCI95 = meanSuCI95,
+                  Bias_S0 = Bias_S0,
                   elapsed = toc)
 
 }
