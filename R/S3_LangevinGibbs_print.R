@@ -5,7 +5,6 @@
 #' @param x An object of class \code{LangevinGibbs}.
 #' @param ... Further arguments to be passed to print routine.
 #'
-#'
 #' @author Oswaldo Gressani \email{oswaldo_gressani@hotmail.fr} .
 #'
 #' @export

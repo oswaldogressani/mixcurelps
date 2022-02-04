@@ -2,7 +2,7 @@
 % Please edit documentation in R/simlpsmc.R
 \name{simlpsmc}
 \alias{simlpsmc}
-\title{Assessing the statistical performance of lpsmc}
+\title{Assessing the statistical performance of lpsmc.}
 \usage{
 simlpsmc(
   n = 300,

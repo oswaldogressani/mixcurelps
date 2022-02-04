@@ -14,7 +14,6 @@
 #'  \item{\code{ER}}{Estrogen receptor \code{0}="<=10fmol", \code{1}=">10fmol".}
 #' }
 #'
-#'
 #' @source \url{https://doi.org/doi:10.18129/B9.bioc.breastCancerVDX}
 #'
 #' @references  Schroeder M, Haibe-Kains B, Culhane A, Sotiriou C, Bontempi G,

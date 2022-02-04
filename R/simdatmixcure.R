@@ -1,4 +1,4 @@
-#' Simulation of survival data to fit mixture cure models
+#' Simulation of survival data to fit mixture cure models.
 #'
 #' @description
 #' This routines simulates survival data with a cure fraction. The data is
@@ -19,7 +19,7 @@
 #'  \emph{beta0=0.70, beta1=-1.15 and beta2=0.95} and the coefficients of the
 #'  latency part are \emph{gamma1=-0.10 and gamma2=0.25}. If
 #'  \code{setting = 2}, the coefficients of the incidence part are
-#'  \emph{beta0=0.1.25, beta1=-0.75 and beta2=0.45} and the coefficients of the
+#'  \emph{beta0=1.25, beta1=-0.75 and beta2=0.45} and the coefficients of the
 #'  latency part are \emph{gamma1=-0.10 and gamma2=0.20}.
 #'
 #' @return
@@ -60,18 +60,19 @@ simdatmixcure <- function(n, wscale, wshape, setting) {
   #--- Generation of cure status
   B <- stats::rbinom(n, size = 1, prob = p) # Cure status B = 1 --> uncured
 
-  #--- Generation of survival times for uncured (B=1) subject from Weibull Cox PH
+  #--- Generation of survival times for uncured (B=1) subject from Weibull CoxPH
   Z <- cbind(stats::rnorm(n), stats::rbinom(n, size = 1, prob = 0.4))
 
   ## Draw survival times from Weibull distribution
   weibshape <- wshape # Weibull shape parameter > 0
   weibscale <- wscale # Weibull scale parameter > 0
   S0 <- function(t) exp(-weibscale * t ^ (weibshape)) # True baseline survival
-  h0 <- function(t) weibscale * weibshape * t ^ (weibshape - 1) # True baseline hazard
-  U <- stats::runif(n)       # Uniform draw
-  Tlat <- as.numeric((-log(U) / (weibscale * exp(Z %*% gammas))) ^ (1 / weibshape))
+  h0 <- function(t) weibscale * weibshape * t ^ (weibshape - 1) # True h0
+  U <- stats::runif(n) # Uniform draw
+  Tlat <- as.numeric((-log(U) / (weibscale * exp(Z %*% gammas))) ^
+                       (1 / weibshape))
   Tlat[Tlat > tau0] <- tau0    # Truncation of survival times
-  Tlat[which(B == 0)] <- 20000 # Large (infinite) survival time for cured subjects
+  Tlat[which(B == 0)] <- 20000 # Large survival time for cured subjects
   tobs <- Tlat
 
   #--- Censoring follows exponential distribution with rate lambda
@@ -86,7 +87,8 @@ simdatmixcure <- function(n, wscale, wshape, setting) {
   #--- Summary statistics on cure and censoring rates
   dataKM <- as.data.frame(cbind(tobs, delta))
   fitKM <- survival::survfit(survival::Surv(tobs, delta) ~ 1, data = dataKM)
-  plateau <- fitKM$time[utils::tail(which((diff(fitKM$surv) < 0) == TRUE), 1) + 1]
+  plateau <-
+    fitKM$time[utils::tail(which((diff(fitKM$surv) < 0) == TRUE), 1) + 1]
   nobs_plateau <- sum(tobs > plateau)
   infomat <- matrix(0, nrow = 1, ncol = 6)
   colnames(infomat) <- c("n", "Cure level", "Cens.rate",

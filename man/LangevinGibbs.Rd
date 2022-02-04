@@ -2,7 +2,7 @@
 % Please edit documentation in R/LangevinGibbs.R
 \name{LangevinGibbs}
 \alias{LangevinGibbs}
-\title{Langevin-Gibbs sampler for inference in a mixture cure model}
+\title{Langevin-Gibbs sampler for inference in a mixture cure model.}
 \usage{
 LangevinGibbs(
   formula,
@@ -12,6 +12,7 @@ LangevinGibbs(
   deltaprior = 1e-04,
   mcmcsample = 10000,
   burnin = 2000,
+  tunparam = 0.25,
   mcmcseed = NULL,
   progbar = c("yes", "no")
 )
@@ -33,6 +34,9 @@ parameter.}
 \item{mcmcsample}{The length of the MCMC chain.}
 
 \item{burnin}{The length of the burnin.}
+
+\item{tunparam}{The initial tuning parameter of the MLWG algorithm,
+default is 0.25.}
 
 \item{mcmcseed}{The seed to be used (for reproducibility).}
 

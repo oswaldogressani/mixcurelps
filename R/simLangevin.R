@@ -1,5 +1,4 @@
-#' Assessing the statistical performance of LangevinGibbs
-#'
+#' Assessing the statistical performance of LangevinGibbs.
 #'
 #' @description
 #' Simulates the LangevinGibbs routine.

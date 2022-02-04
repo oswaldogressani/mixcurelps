@@ -7,3 +7,7 @@
 ### Version 1.1.1 ###
  * **2021-10-06:** Including the Metropolis-Langevin-within-Gibbs
  sampler. Version name: "MCMC kicks in".
+ 
+### Version 1.1.2 ###
+* **2022-02-04:** Minor updates, adding computation of CI width in simulation
+ routines. Version name: "MCMC kick in again".

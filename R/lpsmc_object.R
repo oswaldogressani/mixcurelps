@@ -14,7 +14,7 @@
 #' \item{thetahat}{The vector of estimated B-spline coefficients.}
 #' \item{betahat}{The vector of estimated coefficients in the incidence part.}
 #' \item{gammahat}{The vector of estimated coefficents in the latency part.}
-#' \item{vhat}{The (approximate) posterior maximum for the penalty paramter
+#' \item{vhat}{The (approximate) posterior maximum for the penalty parameter
 #' (in log scale).}
 #' \item{tu}{The largest observed follow-up time.}
 #' \item{ftime}{The vector of observed survival times.}
@@ -22,7 +22,7 @@
 #' \item{K}{The number of B-spline coefficients.}
 #' \item{p}{The number of regression in the incidence part (including
 #' intercept).}
-#' \item{q}{The number of regression coefficients in latency part.}
+#' \item{q}{The number of regression coefficients in the latency part.}
 #' \item{xmean}{The mean covariate vector for the incidence part.}
 #' \item{px}{The logistic link function}
 #' \item{cumult}{A function required to compute the estimated baseline

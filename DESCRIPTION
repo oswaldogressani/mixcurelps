@@ -1,7 +1,7 @@
 Package: mixcurelps
 Type: Package
 Title: Approximate Bayesian Inference in Mixture Cure Models
-Version: 1.1.1
+Version: 1.1.2
 Depends: R (>= 4.1)
 Authors@R: person("Oswaldo","Gressani", 
   email="oswaldo_gressani@hotmail.fr", role=c("aut","cre"))

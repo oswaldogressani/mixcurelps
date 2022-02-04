@@ -2,7 +2,7 @@
 % Please edit documentation in R/lpsmc.R
 \name{lpsmc}
 \alias{lpsmc}
-\title{Fit a mixture cure model with Laplacian-P-splines}
+\title{Fit a mixture cure model with Laplacian-P-splines.}
 \usage{
 lpsmc(formula, data, K = 15, penorder = 3, stepsize = 0.2, deltaprior = 1e-04)
 }

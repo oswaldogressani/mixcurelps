@@ -18,7 +18,6 @@
 #'  \item{\code{SEX}}{\code{0}=Male, \code{1}=Female.}
 #' }
 #'
-#'
 #' @source \url{https://CRAN.R-project.org/package=smcure}
 #'
 #' @references  Kirkwood, J. M., Strawderman, M. H., Ernstoff, M. S.,

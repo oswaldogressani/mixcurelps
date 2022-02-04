@@ -2,7 +2,7 @@
 % Please edit documentation in R/curefit.R
 \name{curefit}
 \alias{curefit}
-\title{Estimated cure proportion}
+\title{Estimated cure proportion from a lpsmc object.}
 \usage{
 curefit(x, covarprofile)
 }

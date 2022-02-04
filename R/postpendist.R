@@ -1,10 +1,8 @@
-#' Plot the normalized approximate posterior of the penalty parameter
-#'
+#' Plot the normalized approximate posterior of the penalty parameter.
 #'
 #' @description
 #' Plots the normalized approximate postrior of the penalty parameter based
 #' on a an object of class \code{lpsmc}.
-#'
 #'
 #' @param x An object of class \code{lpsmc}.
 #' @param low The lower bound on the x-axis (in log scale).
@@ -39,12 +37,12 @@ postpendist <- function(x, low, up, themetype=c("classic","gray","light","dark")
 
   vgrid <- seq(low, up, length = 200)
   dv <- vgrid[2] - vgrid[1]
-  logpvgrid <- unlist(lapply(lapply(vgrid, x$logpv),"[[",1))
-  pvv <- exp(logpvgrid-max(logpvgrid))
-  cnorm <- 1/sum(pvv * dv)
+  logpvgrid <- unlist(lapply(lapply(vgrid, x$logpv2), "[[", 1))
+  pvv <- exp(logpvgrid - max(logpvgrid))
+  cnorm <- 1 / sum(pvv * dv)
   pv <- cnorm * pvv
   pvimg <- data.frame(vgrid, pv)
-  skplot <- ggplot2::ggplot(data = pvimg, ggplot2::aes(x=vgrid, y=pv))
+  skplot <- ggplot2::ggplot(data = pvimg, ggplot2::aes(x = vgrid, y = pv))
   skplot + ggplot2::geom_line(colour="darkblue", size=1.2) +
     ggplot2::xlab("v") +
     ggplot2::ylab("Normalized approximate posterior to p(v|D)") +

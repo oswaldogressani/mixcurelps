@@ -2,7 +2,7 @@
 % Please edit documentation in R/survcurve.R
 \name{survcurve}
 \alias{survcurve}
-\title{Survival curves for the mixture cure model}
+\title{Survival curves for the mixture cure model.}
 \usage{
 survcurve(
   x,

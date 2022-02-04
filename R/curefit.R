@@ -1,4 +1,4 @@
-#' Estimated cure proportion
+#' Estimated cure proportion from a lpsmc object.
 #'
 #' @description
 #' Computes the estimated cure proportion based on a mixture cure model fit

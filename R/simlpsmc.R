@@ -1,4 +1,4 @@
-#' Assessing the statistical performance of lpsmc
+#' Assessing the statistical performance of lpsmc.
 #'
 #'
 #' @description
@@ -214,8 +214,10 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
       SSighat <- matrix(0, nrow = (K - 1) + q, ncol = (K - 1) + q)
       SSighat[1:(K-1),1:(K-1)] <- fitlpsmc$Covhat[1:(K-1), 1:(K-1)]
       SSighat[1:(K-1),K:(K+1)] <- fitlpsmc$Covhat[1:(K - 1), (K + p + 1):dimlat]
-      SSighat[K:(K+1),1:(K-1)] <- t(fitlpsmc$Covhat[1:(K - 1), (K + p + 1):dimlat])
-      SSighat[K:(K+1),K:(K+1)] <- fitlpsmc$Covhat[(K + p + 1):dimlat, (K + p + 1):dimlat]
+      SSighat[K:(K + 1), 1:(K - 1)] <-
+        t(fitlpsmc$Covhat[1:(K - 1), (K + p + 1):dimlat])
+      SSighat[K:(K + 1), K:(K + 1)] <-
+        fitlpsmc$Covhat[(K + p + 1):dimlat, (K + p + 1):dimlat]
       qz_alpha  <- stats::qnorm(alpha * 0.5, lower.tail = FALSE)
       post_sd <- sqrt(as.numeric(t(grad_g) %*% SSighat %*% grad_g))
       CI_g <- c(gstar - qz_alpha * post_sd, gstar + qz_alpha * post_sd)
@@ -278,8 +280,8 @@ simlpsmc <- function(n = 300, K = 15, scenario = 1, S = 500, exactrep = FALSE,
 
   # Create output matrix
   simulres <- matrix(0, nrow = 5 , ncol = 8)
-  colnames(simulres) <- c("Scenario","Parameters", "Mean", "Bias", "ESE", "RMSE",
-                          "CP90","CP95")
+  colnames(simulres) <- c("Scenario","Parameters", "Mean", "Bias", "ESE",
+                          "RMSE", "CP90","CP95")
   rownames(simulres) <- c("beta0","beta1","beta2","gamma1","gamma2")
   simulres[, 1] <- rep(scenario, 5)
   simulres[, 2] <- regcoeffs_true

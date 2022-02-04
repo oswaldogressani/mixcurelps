@@ -1,4 +1,4 @@
-#' Fit a mixture cure model with Laplacian-P-splines
+#' Fit a mixture cure model with Laplacian-P-splines.
 #'
 #' This routine fits a mixture cure model with a logistic link function for
 #' the incidence part and a flexible Cox proportional hazards model for the
@@ -77,10 +77,10 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
                              ncol = length(varnames), byrow = FALSE))
   }
   colnames(mff) <- varnames
-  incidstruct <- attr(stats::terms(formula), "term.labels")[1]
-  ncovar.inci <- sum(strsplit(incidstruct, "+")[[1]] == "+") + 1
-  latestruct <- attr(stats::terms(formula), "term.labels")[2]
-  ncovar.late <- sum(strsplit(latestruct, "+")[[1]] == "+") + 1
+  incidstruct   <- attr(stats::terms(formula), "term.labels")[1]
+  ncovar.inci   <- sum(strsplit(incidstruct, "+")[[1]] == "+") + 1
+  latestruct    <- attr(stats::terms(formula), "term.labels")[2]
+  ncovar.late   <- sum(strsplit(latestruct, "+")[[1]] == "+") + 1
 
   ftime <- mff[, 1]   # Event times
   event <- mff[, 2]   # Event indicator
@@ -122,7 +122,7 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
   #--- Prior precision and penalty matrix
   D <- diag(K)                       # Diagonal matrix
   for (k in 1:penorder) D <- diff(D) # Difference matrix of dimension K-r by K
-  P <- t(D) %*% D                    # Penalty matrix of dimension K-1 by K-1
+  P <- t(D) %*% D                    # Penalty matrix
   P <- P + diag(1e-06,K)             # Diagonal perturbation to make P full rank
   prec_betagamma <- 1e-06            # Prior precision for the regression coeffs.
   a_delta <- deltaprior              # Prior for delta
@@ -138,22 +138,23 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
   }
 
   BKL <- list()
-  for (k in 1:K) BKL[[k]] <- Bsj * matrix(rep(Bsj[, k], K),
-                                          ncol = K, byrow = FALSE)
+  for (k in 1:K) {
+    BKL[[k]] <- Bsj * matrix(rep(Bsj[, k], K), ncol = K, byrow = FALSE)
+  }
 
-  cumult <- function(t, theta,k,l){
+  cumult <- function(t, theta, k, l) {
     bin_index <- as.integer(t / Deltaj) + 1
     bin_index[which(bin_index == (J + 1))] <- J
     h0sj <- exp(colSums(theta * t(Bsj)))
 
-    if(k==0 && l==0){
+    if (k == 0 && l == 0) {
       output <- (cumsum(h0sj)[bin_index]) * Deltaj
-    } else if (k==1 && l==0){
+    } else if (k == 1 && l == 0) {
       h0mat <- matrix(rep(h0sj, K), ncol = K, byrow = FALSE)
-      output <- (apply(h0mat * Bsj, 2, cumsum)[bin_index, ]) * Deltaj
-    } else if (k==1 && l>0){
+      output <- (apply(h0mat * Bsj, 2, cumsum)[bin_index,]) * Deltaj
+    } else if (k == 1 && l > 0) {
       h0mat <- matrix(rep(h0sj, K), ncol = K, byrow = FALSE)
-      output <- (apply(h0mat * BKL[[l]], 2, cumsum)[bin_index, ]) * Deltaj
+      output <- (apply(h0mat * BKL[[l]], 2, cumsum)[bin_index,]) * Deltaj
     }
     return(output)
   }
@@ -190,7 +191,6 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
 
   ## Gradient
   Dloglik <- function(latent) {
-
     gradloglik <- c()
     thetalat <- latent[1:K]
     betalat <- latent[(K + 1):(K + p)]
@@ -200,8 +200,8 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
     Sdelta_ratio <- (1 - event) / Spop(latent)
 
     # Compute preliminary quantities
-    omega_oi <- cumult(ftime, thetalat, k=0, l=0)
-    omega_oik <- cumult(ftime, thetalat, k=1, l=0)
+    omega_oi  <- cumult(ftime, thetalat, k = 0, l = 0)
+    omega_oik <- cumult(ftime, thetalat, k = 1, l = 0)
 
     # Partial derivative wrt spline coefficients
     gradloglik[1:K] <- colSums(event * (Bt - exp(Zg) * omega_oik) -
@@ -209,12 +209,12 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
                                  exp(Zg - exp(Zg) * omega_oi) * omega_oik)
 
     # Partial derivative wrt beta coefficients
-    gradloglik[(K + 1):(K + p)] <- colSums((event * (1 - pX) + Sdelta_ratio * pX *
-                            (1 - pX) * (exp(-exp(Zg) * omega_oi) - 1)) * X)
+    gradloglik[(K + 1):(K + p)] <- colSums((event * (1 - pX) + Sdelta_ratio *
+                        pX * (1 - pX) * (exp(-exp(Zg) * omega_oi) - 1)) * X)
 
     # Partial derivative wrt gamma coefficients
-    gradloglik[(K + p + 1):dimlat] <- colSums((event * (1 - exp(Zg) * omega_oi) -
-                        Sdelta_ratio * pX *exp(Zg - exp(Zg) *
+    gradloglik[(K + p + 1):dimlat] <- colSums((event * (1 - exp(Zg) *
+                    omega_oi) - Sdelta_ratio * pX *exp(Zg - exp(Zg) *
                              omega_oi) * omega_oi) * Z)
 
     return(gradloglik)
@@ -226,56 +226,61 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
     thetalat <- latent[1:K]
     betalat <- latent[(K + 1):(K + p)]
     gammalat <- latent[(K + p + 1):dimlat]
-    pX <- px(betalat,X)
-    dpX <-pX*(1-pX)*X
+    pX <- px(betalat, X)
+    dpX <- pX * (1 - pX) * X
     Zg <- as.numeric(Z %*% gammalat)
     Sp <- Spop(latent)
 
     # Compute preliminary quantities
-    omega_oi <- cumult(ftime, thetalat, k=0, l=0)
-    omega_oik <- cumult(ftime, thetalat, k=1, l=0)
-    ff <- exp(Zg-exp(Zg)*omega_oi)*omega_oik
-    dSp_beta <- pX*(1-pX)*(exp(-exp(Zg)*omega_oi)-1)*X
-    dSp_gamma <- (-pX*exp(Zg-exp(Zg)*omega_oi)*omega_oi)*Z
-    ftilde <- pX*(1-pX)*(exp(-exp(Zg)*omega_oi)-1)
-    dftilde_beta <- (pX*(1-pX)*(1-2*pX)*(exp(-exp(Zg)*omega_oi)-1))*X
-    fbreve <- (exp(-exp(Zg)*omega_oi)-1)
-    dfbreve_gamma <- (-exp(Zg-exp(Zg)*omega_oi)*omega_oi)*Z
-    fddot <- exp(Zg-exp(Zg)*omega_oi)
-    dfddot_gamma <- fddot*(1-exp(Zg)*omega_oi)*Z
+    omega_oi <- cumult(ftime, thetalat, k = 0, l = 0)
+    omega_oik <- cumult(ftime, thetalat, k = 1, l = 0)
+    ff <- exp(Zg - exp(Zg) * omega_oi) * omega_oik
+    dSp_beta <- pX * (1 - pX) * (exp(-exp(Zg) * omega_oi) - 1) * X
+    dSp_gamma <- (-pX * exp(Zg - exp(Zg) * omega_oi) * omega_oi) * Z
+    ftilde <- pX * (1 - pX) * (exp(-exp(Zg) * omega_oi) - 1)
+    dftilde_beta <- (pX * (1 - pX) * (1 - 2 * pX) *
+                       (exp(-exp(Zg) * omega_oi) - 1)) * X
+    fbreve <- (exp(-exp(Zg) * omega_oi) - 1)
+    dfbreve_gamma <- (-exp(Zg - exp(Zg) * omega_oi) * omega_oi) * Z
+    fddot <- exp(Zg - exp(Zg) * omega_oi)
+    dfddot_gamma <- fddot * (1 - exp(Zg) * omega_oi) * Z
 
     # Block 11
-    Block11 <- matrix(0, nrow=K, ncol=K)
-    for(l in 1:K){
-      omega_oikl <- cumult(ftime, thetalat, k=1,l=l)
-      df <- exp(Zg-exp(Zg)*omega_oi)*omega_oikl-ff*exp(Zg)*omega_oik[,l]
-      dSp <- (-pX*exp(Zg-exp(Zg)*omega_oi)*omega_oik[,l])
+    Block11 <- matrix(0, nrow = K, ncol = K)
+    for (l in 1:K) {
+      omega_oikl <- cumult(ftime, thetalat, k = 1, l = l)
+      df <- exp(Zg - exp(Zg) * omega_oi) * omega_oikl - ff *
+        exp(Zg) * omega_oik[, l]
+      dSp <- (-pX * exp(Zg - exp(Zg) * omega_oi) * omega_oik[, l])
 
-      Block11[l,] <- colSums((-event*exp(Zg)*omega_oikl)-
-                               (1-event) * pX * (Sp^(-2)) * (df*Sp-ff*dSp))
+      Block11[l, ] <- colSums((-event * exp(Zg) * omega_oikl) -
+                                (1 - event) * pX * (Sp ^ (-2)) *
+                                (df * Sp - ff * dSp))
     }
 
     # Block 12
-    Block12 <- t(ff) %*% (-(1-event)*(dpX*Sp-pX*dSp_beta)*Sp^(-2))
+    Block12 <- t(ff) %*% (-(1 - event) * (dpX * Sp - pX * dSp_beta) * Sp ^
+                            (-2))
 
     # Block 13
-    Block13 <- t(omega_oik)%*%(-event*exp(Zg)*Z)-
-      t(ff)%*%((((1-exp(Zg)*omega_oi)*Z*Sp)-
-                  ((-pX*exp(Zg-exp(Zg)*omega_oi)*omega_oi)*Z)) *
-                 ((1-event) * pX * Sp^(-2)))
+    Block13 <- t(omega_oik) %*% (-event * exp(Zg) * Z) -
+      t(ff) %*% ((((1 - exp(Zg) * omega_oi) * Z * Sp) -
+        ((-pX * exp(Zg - exp(Zg) * omega_oi) * omega_oi) * Z)) *
+        ((1 - event) * pX * Sp ^ (-2)))
 
     # Block 22
-    Block22 <- t(-event*pX*(1-pX)*X)%*%X +
-      (t((1-event)*Sp^(-2)*(dftilde_beta*Sp-ftilde*dSp_beta))%*%X)
+    Block22 <- t(-event * pX * (1 - pX) * X) %*% X +
+      (t((1 - event) * Sp ^ (-2) * (dftilde_beta * Sp - ftilde * dSp_beta)) %*%
+         X)
 
     # Block 23
-    Block23 <- t(X)%*%((1-event)*pX*(1-pX)*Sp^(-2)*
-                              (dfbreve_gamma*Sp-fbreve*dSp_gamma))
+    Block23 <- t(X) %*% ((1 - event) * pX * (1 - pX) * Sp ^ (-2) *
+                           (dfbreve_gamma * Sp - fbreve * dSp_gamma))
 
     # Block 33
-    Block33 <- t(-event*exp(Zg)*omega_oi*Z)%*%Z -
-      t(((1-event)*pX*omega_oi*Sp^(-2))*
-          (dfddot_gamma*Sp-fddot*dSp_gamma))%*%Z
+    Block33 <- t(-event * exp(Zg) * omega_oi * Z) %*% Z -
+      t(((1 - event) * pX * omega_oi * Sp ^ (-2)) *
+          (dfddot_gamma * Sp - fddot * dSp_gamma)) %*% Z
 
     # Construction of Hessian matrix
     Hess <- matrix(0, nrow = dimlat, ncol = dimlat)
@@ -323,23 +328,22 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
 
   #--- log p(v|D) function
   logpv <- function(v, lat0){
-
-    LL <- Rcpp_Laplace(lat0 = lat0,v=v,K=K,PDcorrect,Dloglik,D2loglik,Qv)
+    LL <- Rcpp_Laplace(lat0 = lat0, v = v, K = K, PDcorrect,
+                       Dloglik, D2loglik, Qv)
     latstar_cc <- LL$latstar                    # Mean of Laplace
     Covstar_c <- LL$Covstar                     # Covariance matrix of Laplace
     logdetCovstar_c <- Re(LL$logdetCovstarc)
-    Q <- Qv(v)                                  # Precision of latent vector
+    Q <- Qv(v)
 
     logpv_value <- 0.5 * logdetCovstar_c + loglik(latstar_cc) -
       0.5 * sum((latstar_cc * Q) %*% latstar_cc) +
-      0.5 * (K + nu) * v -
-      (0.5 * nu + a_delta) * log(0.5 * nu * exp(v) + b_delta)
+      0.5 * (K + nu) * v - (0.5 * nu + a_delta) *
+      log(0.5 * nu * exp(v) + b_delta)
 
     outlist <- list(value = logpv_value, latstar = latstar_cc)
     return(outlist)
 
   }
-
 
   #--- Exploration with golden search
   find_vmap <- function(){
@@ -371,7 +375,8 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
   vfind <- find_vmap()
   vstar <- vfind$vmap
   lat0  <- vfind$latstar
-  LL <- Rcpp_Laplace(lat0 = lat0, v=vstar, K=K,PDcorrect,Dloglik,D2loglik,Qv)
+  LL <- Rcpp_Laplace(lat0 = lat0, v = vstar, K = K, PDcorrect,
+                     Dloglik, D2loglik, Qv)
   lathat <- LL$latstar
 
   #--- Estimated coefficients
@@ -381,17 +386,17 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
   Covhat <- Cov_full(LL$Covstar)           # Covariance matrix dimlat x dimlat
 
   logpv2 <- function(v){
-
-    LL <- Rcpp_Laplace(lat0 = lathat,v=v,K=K,PDcorrect,Dloglik,D2loglik,Qv)
+    LL <- Rcpp_Laplace(lat0 = lathat, v = v, K = K, PDcorrect,
+                       Dloglik, D2loglik, Qv)
     latstar_cc <- LL$latstar                    # Mean of Laplace
     Covstar_c <- LL$Covstar                     # Covariance matrix of Laplace
     logdetCovstar_c <- Re(LL$logdetCovstarc)
-    Q <- Qv(v)                                  # Precision of latent vector
+    Q <- Qv(v)
 
     logpv_value <- 0.5 * logdetCovstar_c + loglik(latstar_cc) -
       0.5 * sum((latstar_cc * Q) %*% latstar_cc) +
-      0.5 * (K + nu) * v -
-      (0.5 * nu + a_delta) * log(0.5 * nu * exp(v) + b_delta)
+      0.5 * (K + nu) * v - (0.5 * nu + a_delta) *
+      log(0.5 * nu * exp(v) + b_delta)
 
     return(logpv_value)
 
@@ -439,7 +444,6 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
     return(CIcure_original)
   }
 
-
   if((colnames(X)[2] == "x1")){
     xmean <- c(1, 0, 0.5)
   } else {
@@ -474,7 +478,7 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
     q = q,
     xmean = xmean,
     px = px,
-    logpv = logpv2,
+    logpv2 = logpv2,
     cumult = cumult,
     CI90 = CI90,
     CI95 = CI95,

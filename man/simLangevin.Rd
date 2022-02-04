@@ -2,7 +2,7 @@
 % Please edit documentation in R/simLangevin.R
 \name{simLangevin}
 \alias{simLangevin}
-\title{Assessing the statistical performance of LangevinGibbs}
+\title{Assessing the statistical performance of LangevinGibbs.}
 \usage{
 simLangevin(
   n = 300,

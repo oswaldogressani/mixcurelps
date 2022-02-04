@@ -4,9 +4,7 @@
 # Plot method for an object of class simdatmixcure
 plot.simdatmixcure <- function(x, ...) {
 
-
   # tdom <- seq(0, x$tup, length = 1000)
-
   # graphics::plot(x$fitKM, mark.time = TRUE, mark = "x", xlab = "t",
   #                ylab = expression(S[0](t)), main = "Baseline survival",
   #                cex.main = 0.9)
@@ -31,9 +29,9 @@ plot.simdatmixcure <- function(x, ...) {
                         size = 1,
                         palette = "#0089FF",
                         conf.int = TRUE,
-                        font.tickslab = c(14,"darkblue"),
-                        font.x =c(14,"black"),
-                        font.y = c(14,"black"),
+                        font.tickslab = c(14, "darkblue"),
+                        font.x = c(14, "black"),
+                        font.y = c(14, "black"),
                         ggtheme = ggplot2::theme_light(),
                         risk.table = "percentage",
                         risk.table.col ="darkblue",
@@ -43,8 +41,8 @@ plot.simdatmixcure <- function(x, ...) {
                         )
   plotsurv$table <- plotsurv$table + ggplot2::theme(
     axis.text.y = ggplot2::element_blank(),
-    axis.text.x = ggplot2::element_text(size=14),
-    axis.title.x = ggplot2::element_text(size=14)
+    axis.text.x = ggplot2::element_text(size = 14),
+    axis.title.x = ggplot2::element_text(size = 14)
   )
 
   plotsurv $plot<- plotsurv$plot + ggplot2::geom_vline(xintercept = x$plateau,

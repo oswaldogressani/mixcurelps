@@ -2,7 +2,7 @@
 % Please edit documentation in R/postpendist.R
 \name{postpendist}
 \alias{postpendist}
-\title{Plot the normalized approximate posterior of the penalty parameter}
+\title{Plot the normalized approximate posterior of the penalty parameter.}
 \usage{
 postpendist(x, low, up, themetype = c("classic", "gray", "light", "dark"))
 }

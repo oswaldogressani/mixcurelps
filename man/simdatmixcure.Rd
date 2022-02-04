@@ -2,7 +2,7 @@
 % Please edit documentation in R/simdatmixcure.R
 \name{simdatmixcure}
 \alias{simdatmixcure}
-\title{Simulation of survival data to fit mixture cure models}
+\title{Simulation of survival data to fit mixture cure models.}
 \usage{
 simdatmixcure(n, wscale, wshape, setting)
 }
@@ -20,7 +20,7 @@ to generate the survival times of the uncured subjects.}
 \emph{beta0=0.70, beta1=-1.15 and beta2=0.95} and the coefficients of the
 latency part are \emph{gamma1=-0.10 and gamma2=0.25}. If
 \code{setting = 2}, the coefficients of the incidence part are
-\emph{beta0=0.1.25, beta1=-0.75 and beta2=0.45} and the coefficients of the
+\emph{beta0=1.25, beta1=-0.75 and beta2=0.45} and the coefficients of the
 latency part are \emph{gamma1=-0.10 and gamma2=0.20}.}
 }
 \value{

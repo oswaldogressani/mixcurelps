@@ -1,4 +1,4 @@
-#' Survival curves for the mixture cure model
+#' Survival curves for the mixture cure model.
 #'
 #' @description
 #' This routine creates objects related to the baseline survival

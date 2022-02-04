@@ -1,4 +1,4 @@
-#' Langevin-Gibbs sampler for inference in a mixture cure model
+#' Langevin-Gibbs sampler for inference in a mixture cure model.
 #'
 #'
 #' @description
@@ -19,6 +19,8 @@
 #'  parameter.
 #' @param mcmcsample The length of the MCMC chain.
 #' @param burnin The length of the burnin.
+#' @param tunparam The initial tuning parameter of the MLWG algorithm,
+#'  default is 0.25.
 #' @param mcmcseed The seed to be used (for reproducibility).
 #' @param progbar Should a progress bar be shown? Default is yes.
 #'
@@ -26,10 +28,8 @@
 #'
 #' @export
 
-
-
 LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-04,
-                         mcmcsample = 10000, burnin = 2000,
+                         mcmcsample = 10000, burnin = 2000, tunparam = 0.25,
                          mcmcseed = NULL, progbar = c("yes","no")){
 
   tic <- proc.time()
@@ -113,7 +113,7 @@ LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-0
   #--- Prior precision and penalty matrix
   D <- diag(K)                       # Diagonal matrix
   for (k in 1:penorder) D <- diff(D) # Difference matrix of dimension K-r by K
-  P <- t(D) %*% D                    # Penalty matrix of dimension K-1 by K-1
+  P <- t(D) %*% D                    # Penalty matrix
   P <- P + diag(1e-06,K)             # Diagonal perturbation to make P full rank
   prec_betagamma <- 1e-06            # Prior precision for the regression coeffs.
   a_delta <- deltaprior              # Prior for delta
@@ -136,7 +136,6 @@ LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-0
     bin_index <- as.integer(t / Deltaj) + 1
     bin_index[which(bin_index == (J + 1))] <- J
     h0sj <- exp(colSums(theta * t(Bsj)))
-
     if(k==0 && l==0){
       output <- (cumsum(h0sj)[bin_index]) * Deltaj
     } else if (k==1 && l==0){
@@ -153,14 +152,14 @@ LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-0
   px <- function(betalat, x) as.numeric((1 + exp(-(x %*% betalat))) ^ (-1))
 
   #--- Population survival function
-  Spop <- function(latent){
+  Spop <- function(latent) {
     thetalat <- latent[1:K]
     betalat <- latent[(K + 1):(K + p)]
     gammalat <- latent[(K + p + 1):dimlat]
-    pX <- px(betalat,X)
-    Zg <- as.numeric(Z%*%gammalat)
-    Su <- exp(-exp(Zg)*cumult(ftime,thetalat,k=0,l=0))
-    Spop_value <- 1-pX+pX*Su
+    pX <- px(betalat, X)
+    Zg <- as.numeric(Z %*% gammalat)
+    Su <- exp(-exp(Zg) * cumult(ftime, thetalat, k = 0, l = 0))
+    Spop_value <- 1 - pX + pX * Su
     return(Spop_value)
   }
 
@@ -181,7 +180,6 @@ LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-0
 
   #--- Gradient of log-likelihood function
   Dloglik <- function(latent) {
-
     gradloglik <- c()
     thetalat <- latent[1:K]
     betalat <- latent[(K + 1):(K + p)]
@@ -200,19 +198,20 @@ LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-0
                                  exp(Zg - exp(Zg) * omega_oi) * omega_oik)
 
     # Partial derivative wrt beta coefficients
-    gradloglik[(K + 1):(K + p)] <- colSums((event * (1 - pX) + Sdelta_ratio * pX *
-                                              (1 - pX) * (exp(-exp(Zg) * omega_oi) - 1)) * X)
+    gradloglik[(K + 1):(K + p)] <- colSums((event * (1 - pX) + Sdelta_ratio *
+                                              pX * (1 - pX) * (exp(-exp(Zg) *
+                                                        omega_oi) - 1)) * X)
 
     # Partial derivative wrt gamma coefficients
-    gradloglik[(K + p + 1):dimlat] <- colSums((event * (1 - exp(Zg) * omega_oi) -
-                                                 Sdelta_ratio * pX *exp(Zg - exp(Zg) *
-                                                                          omega_oi) * omega_oi) * Z)
+    gradloglik[(K + p + 1):dimlat] <- colSums((event * (1 - exp(Zg) *
+        omega_oi) - Sdelta_ratio * pX *exp(Zg - exp(Zg) * omega_oi) *
+          omega_oi) * Z)
 
     return(gradloglik)
 
   }
 
-  #---------------------- Metropolis-Langevin-within-Gibbs sampler
+  #---------------------- Metropolis-Langevin-within-Gibbs (MLWG) sampler
 
   # log posterior of conditional latent vector (given roughness penalty)
   logtar <- function(latent, lambda) {
@@ -247,7 +246,7 @@ LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-0
     # Chain hosting
     thetachain <- matrix(0, nrow = M, ncol = K)
     betachain <- matrix(0, nrow = M, ncol = p)
-    gammachain <- matrix(0, nrow =M, ncol = q)
+    gammachain <- matrix(0, nrow = M, ncol = q)
     lambdachain<- c()
     deltachain <- c()
     naccept <- 0
@@ -257,9 +256,7 @@ LangevinGibbs <- function(formula, data, K = 15, penorder = 3, deltaprior = 1e-0
       total = M,
       clear = FALSE
     )
-
-    # Variance parameter for Langevin dynamics
-    Ldelta <- 0.25
+    Ldelta <- tunparam  # Tuning parameter for Langevin dynamics
 
     for (m in 1:M) {
 

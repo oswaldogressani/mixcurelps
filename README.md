@@ -3,11 +3,16 @@ The mixcurelps package
 
 <!-- Introduce badges -->
 
-![Version](https://img.shields.io/badge/Version-1.1.1-lightgrey)
+![Version](https://img.shields.io/badge/Version-1.1.2-lightgrey)
 ![Languages](https://img.shields.io/badge/Languages-R%2C%20C%2B%2B-informational)
-![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-yellow)
+![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-green)
 
   
+
+<!-- ![](man/figures/Cancer_AdobeStock.jpeg){width=150%, height=400px} -->
+
+<img src="man/figures/Cancer_AdobeStock.jpeg" width="150%" height="400px" style="display: block; margin: auto auto auto 0;" />
+<br> <br>  
 
 The `mixcurelps` package can be used to fit mixture cure survival models
 with Laplacian-P-splines. It is based on the methodology presented in
@@ -61,9 +66,6 @@ routine, the user can do a variety of things among which:
 -   Plot the posterior of the (log) penalty parameter.
 -   Plot baseline survival curves and survival curves of uncured
     subjects.
-
-This version is unstable and there is still room to further improve the
-routines.
 
 ## Getting ready
 
@@ -134,7 +136,7 @@ fit
     ## z1   -0.176  0.085    -0.317   -0.036    -0.343   -0.009
     ## z2    0.461  0.154     0.208    0.714     0.160    0.762
     ## ------------------------------------------------------------------------------------------ 
-    ## 'Real' elapsed time: 0.63 seconds.
+    ## 'Real' elapsed time: 0.69 seconds.
 
 The table above shows the pointwise estimates, posterior standard
 deviation and credible intervals for the regression parameters in the
@@ -237,7 +239,7 @@ fitMLWG
     ## z1   -0.177  0.086    -0.316   -0.034    -0.340   -0.004
     ## z2    0.463  0.157     0.202    0.717     0.133    0.766
     ## ------------------------------------------------------------------------------------------ 
-    ## 'Real' elapsed time: 37.18 seconds
+    ## 'Real' elapsed time: 41 seconds
     ## MCMC chain length: 15000
     ## Burn-in length: 5000
     ## MCMC acceptance rate: 56.08%.
@@ -315,7 +317,7 @@ sims <- simlpsmc(n = 300, scenario = 1, S = S, themetype = "classic")
     ## CP90%  78.8 88.2 89.0 87.8 87.0 91.0 93.2 89.6 72.0 18.6
     ## CP95%  87.6 93.0 93.6 94.0 94.8 97.0 97.6 93.6 82.0 27.4
     ## ------------------------------------------------------------------------------------------ 
-    ## Total elapsed time: 208.64 seconds.
+    ## Total elapsed time: 228.64 seconds.
 
 The above table shows the simulation results associated with the
 regression coefficients (table on top) and also the estimated (90% and
@@ -323,7 +325,7 @@ regression coefficients (table on top) and also the estimated (90% and
 survival curve of the uncured respectively at selected quantiles.
 Dividing the total elapsed time by the number of replications allows to
 assess the average time required by the `lpsmc()` routine to fit the
-model (here 0.417 seconds). To show the simulation results associated
+model (here 0.457 seconds). To show the simulation results associated
 with the regression coefficients in a clean table:
 
 ``` r
@@ -352,11 +354,11 @@ gridExtra::grid.arrange(sims$S0plot, sims$ASEplot, nrow = 1)
 
 ## Package version
 
-This is version 1.1.1 (2021-10-06) – “MCMC kicks in”.
+This is version 1.1.2 (2022-02-04) – “MCMC kicks in again”.
 
 ## License
 
-Copyright © 2021 Oswaldo Gressani. All rights reserved.
+Copyright © 2022 Oswaldo Gressani. All rights reserved.
 
 ## References
 
@@ -372,6 +374,10 @@ Jullion, A., and Lambert, P. (2007). Robust specification of the
 roughness penalty prior distribution in spatially adaptive Bayesian
 P-splines models. *Computational Statistics & Data Analysis*, 51(5),
 2542-2558. <https://doi.org/10.1016/j.csda.2006.09.027>
+
+## Striking Image
+
+© Christoph Burgstedt - Adobe Stock.
 
 ## Acknowledgments
 
