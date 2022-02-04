@@ -10,4 +10,4 @@
  
 ### Version 1.1.2 ###
 * **2022-02-04:** Minor updates, adding computation of CI width in simulation
- routines. Version name: "MCMC kick in again".
+ routines. Version name: "MCMC kicks in again".
