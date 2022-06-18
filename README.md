@@ -16,7 +16,7 @@ The mixcurelps package
 
 The `mixcurelps` package can be used to fit mixture cure survival models
 with Laplacian-P-splines. It is based on the methodology presented in
-[(Gressani, Faes, Hens, 2021)](https://arxiv.org/abs/2103.01526). The
+[(Gressani, Faes, Hens, 2022)](https://doi.org/10.1002/sim.9373). The
 population survival function is assumed to be a mixture of uncured and
 cured subjects. As such, the model accounts for long-term survivors that
 will never experience the event of interest, no matter how long the
@@ -136,19 +136,24 @@ fit
     ## z1   -0.176  0.085    -0.317   -0.036    -0.343   -0.009
     ## z2    0.461  0.154     0.208    0.714     0.160    0.762
     ## ------------------------------------------------------------------------------------------ 
-    ## 'Real' elapsed time: 0.69 seconds.
+    ## 'Real' elapsed time: 0.79 seconds.
 
 The table above shows the pointwise estimates, posterior standard
 deviation and credible intervals for the regression parameters in the
 incidence and latency parts of the model. For this particular simulated
 setting, the coefficients of the incidence part are
-*β*<sub>0</sub> = 0.70, *β*<sub>1</sub> =  − 1.15 and
-*β*<sub>2</sub> = 0.95. For the latency part one has,
-*γ*<sub>1</sub> =  − 0.10 and *γ*<sub>2</sub> = 0.25. Finally, the table
-ends by showing the elapsed wall clock time required by the `lpsmc()`
-routine in seconds. Let us now see how the (approximate) posterior of
-the (log) penalty parameter looks like by using the `postpendist()`
-routine:
+![\\beta_0=0.70](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_0%3D0.70 "\beta_0=0.70"),
+![\\beta_1=-1.15](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_1%3D-1.15 "\beta_1=-1.15")
+and
+![\\beta_2=0.95](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_2%3D0.95 "\beta_2=0.95").
+For the latency part one has,
+![\\gamma_1=-0.10](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cgamma_1%3D-0.10 "\gamma_1=-0.10")
+and
+![\\gamma_2=0.25](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cgamma_2%3D0.25 "\gamma_2=0.25").
+Finally, the table ends by showing the elapsed wall clock time required
+by the `lpsmc()` routine in seconds. Let us now see how the
+(approximate) posterior of the (log) penalty parameter looks like by
+using the `postpendist()` routine:
 
 ``` r
 postpendist(fit, low = 8, up = 15, themetype = "gray")
@@ -239,7 +244,7 @@ fitMLWG
     ## z1   -0.177  0.086    -0.316   -0.034    -0.340   -0.004
     ## z2    0.463  0.157     0.202    0.717     0.133    0.766
     ## ------------------------------------------------------------------------------------------ 
-    ## 'Real' elapsed time: 41 seconds
+    ## 'Real' elapsed time: 40.29 seconds
     ## MCMC chain length: 15000
     ## Burn-in length: 5000
     ## MCMC acceptance rate: 56.08%.
@@ -263,8 +268,10 @@ To check that the generated chains have converged, we look at the Geweke
 diagnostics of the latent variables (and the hyperparameters). Here in
 total, we have 18 blue points (11 B-splines plus 5 regression
 coefficients plus 2 hyperparameters). All of the Geweke z-scores are
-within the ( − 1.96, 1.96) range (red dotted horizontal lines), which is
-a good sign of convergence.
+within the
+![(-1.96,1.96)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%28-1.96%2C1.96%29 "(-1.96,1.96)")
+range (red dotted horizontal lines), which is a good sign of
+convergence.
 
 ``` r
 plot(fitMLWG$Geweke,type="p", pch=8, col="blue", ylim=c(-2.5,2.5),
@@ -280,9 +287,11 @@ To assess the statistical performance of the methodology underlying the
 algorithms, the `simlpsmc()` routine can be used to simulate datasets in
 an iterative way and compute some metrics to assess how precise the
 model fit is. The code below simulates `S=500` replications of samples
-of size 300 and for each iteration fits a mixture cure model with
-`lpsmc()`. A table with the desired metrics to check the performance
-summarizes the simulations.
+of size
+![300](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;300 "300")
+and for each iteration fits a mixture cure model with `lpsmc()`. A table
+with the desired metrics to check the performance summarizes the
+simulations.
 
 ``` r
 S <- 500
@@ -317,7 +326,7 @@ sims <- simlpsmc(n = 300, scenario = 1, S = S, themetype = "classic")
     ## CP90%  78.8 88.2 89.0 87.8 87.0 91.0 93.2 89.6 72.0 18.6
     ## CP95%  87.6 93.0 93.6 94.0 94.8 97.0 97.6 93.6 82.0 27.4
     ## ------------------------------------------------------------------------------------------ 
-    ## Total elapsed time: 228.64 seconds.
+    ## Total elapsed time: 227.56 seconds.
 
 The above table shows the simulation results associated with the
 regression coefficients (table on top) and also the estimated (90% and
@@ -325,7 +334,7 @@ regression coefficients (table on top) and also the estimated (90% and
 survival curve of the uncured respectively at selected quantiles.
 Dividing the total elapsed time by the number of replications allows to
 assess the average time required by the `lpsmc()` routine to fit the
-model (here 0.457 seconds). To show the simulation results associated
+model (here 0.455 seconds). To show the simulation results associated
 with the regression coefficients in a clean table:
 
 ``` r
@@ -362,9 +371,9 @@ Copyright © 2022 Oswaldo Gressani. All rights reserved.
 
 ## References
 
-Gressani, O., Faes, C. and Hens, N. (2021). Laplacian P-splines for
-Bayesian inference in the mixture cure model. ArXiv preprint.
-arxiv.org/abs/2103.01526
+Gressani, O., Faes, C. and Hens, N. (2022). Laplacian P-splines for
+Bayesian inference in the mixture cure model. *Statistics in Medicine*,
+41(14), 2602-2626. <https://doi.org/10.1002/sim.9373>
 
 Eilers, P.H.C. and Marx, B.D. (1996). Flexible smoothing with B-splines
 and penalties. *Statistical Science*, 11(2), 89-121.
