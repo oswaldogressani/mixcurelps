@@ -28,6 +28,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Rcpp_Laplace2
+List Rcpp_Laplace2(NumericVector lat0, double v, int K, Function Dloglik, Function D2loglik, Function Qv);
+RcppExport SEXP _mixcurelps_Rcpp_Laplace2(SEXP lat0SEXP, SEXP vSEXP, SEXP KSEXP, SEXP DloglikSEXP, SEXP D2loglikSEXP, SEXP QvSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type lat0(lat0SEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< Function >::type Dloglik(DloglikSEXP);
+    Rcpp::traits::input_parameter< Function >::type D2loglik(D2loglikSEXP);
+    Rcpp::traits::input_parameter< Function >::type Qv(QvSEXP);
+    rcpp_result_gen = Rcpp::wrap(Rcpp_Laplace2(lat0, v, K, Dloglik, D2loglik, Qv));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Rcpp_cubicBspline
 NumericMatrix Rcpp_cubicBspline(NumericVector x, double lower, double upper, int K);
 RcppExport SEXP _mixcurelps_Rcpp_cubicBspline(SEXP xSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP KSEXP) {
@@ -45,6 +61,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mixcurelps_Rcpp_Laplace", (DL_FUNC) &_mixcurelps_Rcpp_Laplace, 7},
+    {"_mixcurelps_Rcpp_Laplace2", (DL_FUNC) &_mixcurelps_Rcpp_Laplace2, 6},
     {"_mixcurelps_Rcpp_cubicBspline", (DL_FUNC) &_mixcurelps_Rcpp_cubicBspline, 4},
     {NULL, NULL, 0}
 };

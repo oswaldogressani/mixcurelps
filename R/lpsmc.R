@@ -18,6 +18,8 @@
 #' @param stepsize The stepsize taken to maximize the log posterior penalty.
 #' @param deltaprior The parameters of the Gamma prior for the dispersion
 #'  parameter.
+#' @param v0 Initial parameter value for finding MAP of penalty parameter.
+#' @param checkPD Should checks for positive definiteness be made? Default is TRUE.
 #'
 #' @return An object of class \code{lpsmc}.
 #'
@@ -47,7 +49,7 @@
 #' @export
 
 lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
-                  deltaprior = 1e-04){
+                  deltaprior = 1e-04, v0 = 15, checkPD = TRUE){
 
   #--- Start clock
   tic <- proc.time()
@@ -328,8 +330,12 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
 
   #--- log p(v|D) function
   logpv <- function(v, lat0){
-    LL <- Rcpp_Laplace(lat0 = lat0, v = v, K = K, PDcorrect,
+    if(checkPD == FALSE){
+      LL <- Rcpp_Laplace2(lat0 = lat0, v = v, K = K, Dloglik, D2loglik, Qv)
+    } else{
+      LL <- Rcpp_Laplace(lat0 = lat0, v = v, K = K, PDcorrect,
                        Dloglik, D2loglik, Qv)
+    }
     latstar_cc <- LL$latstar                    # Mean of Laplace
     Covstar_c <- LL$Covstar                     # Covariance matrix of Laplace
     logdetCovstar_c <- Re(LL$logdetCovstarc)
@@ -347,7 +353,7 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
 
   #--- Exploration with golden search
   find_vmap <- function(){
-    v0 <- 15
+    v0 <- v0
     vv <- c()
     lpvv <- c()
     vv[1] <- v0
@@ -375,8 +381,12 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
   vfind <- find_vmap()
   vstar <- vfind$vmap
   lat0  <- vfind$latstar
-  LL <- Rcpp_Laplace(lat0 = lat0, v = vstar, K = K, PDcorrect,
+  if(checkPD == FALSE){
+    LL <- Rcpp_Laplace2(lat0 = lat0, v = vstar, K = K, Dloglik, D2loglik, Qv)
+  } else{
+    LL <- Rcpp_Laplace(lat0 = lat0, v = vstar, K = K, PDcorrect,
                      Dloglik, D2loglik, Qv)
+  }
   lathat <- LL$latstar
 
   #--- Estimated coefficients
@@ -386,8 +396,12 @@ lpsmc <- function(formula, data, K = 15, penorder = 3, stepsize = 0.2,
   Covhat <- Cov_full(LL$Covstar)           # Covariance matrix dimlat x dimlat
 
   logpv2 <- function(v){
-    LL <- Rcpp_Laplace(lat0 = lathat, v = v, K = K, PDcorrect,
+    if(checkPD == FALSE){
+      LL <- Rcpp_Laplace2(lat0 = lathat, v = v, K = K, Dloglik, D2loglik, Qv)
+    } else{
+      LL <- Rcpp_Laplace(lat0 = lathat, v = v, K = K, PDcorrect,
                        Dloglik, D2loglik, Qv)
+    }
     latstar_cc <- LL$latstar                    # Mean of Laplace
     Covstar_c <- LL$Covstar                     # Covariance matrix of Laplace
     logdetCovstar_c <- Re(LL$logdetCovstarc)

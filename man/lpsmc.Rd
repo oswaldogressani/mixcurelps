@@ -4,7 +4,16 @@
 \alias{lpsmc}
 \title{Fit a mixture cure model with Laplacian-P-splines.}
 \usage{
-lpsmc(formula, data, K = 15, penorder = 3, stepsize = 0.2, deltaprior = 1e-04)
+lpsmc(
+  formula,
+  data,
+  K = 15,
+  penorder = 3,
+  stepsize = 0.2,
+  deltaprior = 1e-04,
+  v0 = 15,
+  checkPD = TRUE
+)
 }
 \arguments{
 \item{formula}{A model formula of the form \code{Surv(tobs,delta)~
@@ -20,6 +29,10 @@ inci()+late()}.}
 
 \item{deltaprior}{The parameters of the Gamma prior for the dispersion
 parameter.}
+
+\item{v0}{Initial parameter value for finding MAP of penalty parameter.}
+
+\item{checkPD}{Should checks for positive definiteness be made? Default is TRUE.}
 }
 \value{
 An object of class \code{lpsmc}.

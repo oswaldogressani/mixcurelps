@@ -5,6 +5,10 @@ Rcpp_Laplace <- function(lat0, v, K, PDcorrect, Dloglik, D2loglik, Qv) {
     .Call(`_mixcurelps_Rcpp_Laplace`, lat0, v, K, PDcorrect, Dloglik, D2loglik, Qv)
 }
 
+Rcpp_Laplace2 <- function(lat0, v, K, Dloglik, D2loglik, Qv) {
+    .Call(`_mixcurelps_Rcpp_Laplace2`, lat0, v, K, Dloglik, D2loglik, Qv)
+}
+
 Rcpp_cubicBspline <- function(x, lower, upper, K) {
     .Call(`_mixcurelps_Rcpp_cubicBspline`, x, lower, upper, K)
 }

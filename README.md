@@ -3,7 +3,7 @@ The mixcurelps package
 
 <!-- Introduce badges -->
 
-![Version](https://img.shields.io/badge/Version-1.1.2-lightgrey)
+![Version](https://img.shields.io/badge/Version-1.1.3-lightgrey)
 ![Languages](https://img.shields.io/badge/Languages-R%2C%20C%2B%2B-informational)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-green)
 
@@ -59,13 +59,12 @@ exhibits a plateau. Thus, the datasets are suitable for mixture cure
 model analysis. Once the model has been fitted with the `lpsmc()`
 routine, the user can do a variety of things among which:
 
--   See pointwise estimates and (approximate) credible intervals of
-    regression coefficients.
--   Compute the estimated cure proportion and associated credibility
-    envelopes.
--   Plot the posterior of the (log) penalty parameter.
--   Plot baseline survival curves and survival curves of uncured
-    subjects.
+- See pointwise estimates and (approximate) credible intervals of
+  regression coefficients.
+- Compute the estimated cure proportion and associated credibility
+  envelopes.
+- Plot the posterior of the (log) penalty parameter.
+- Plot baseline survival curves and survival curves of uncured subjects.
 
 ## Getting ready
 
@@ -141,19 +140,12 @@ fit
 The table above shows the pointwise estimates, posterior standard
 deviation and credible intervals for the regression parameters in the
 incidence and latency parts of the model. For this particular simulated
-setting, the coefficients of the incidence part are
-![\\beta_0=0.70](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_0%3D0.70 "\beta_0=0.70"),
-![\\beta_1=-1.15](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_1%3D-1.15 "\beta_1=-1.15")
-and
-![\\beta_2=0.95](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_2%3D0.95 "\beta_2=0.95").
-For the latency part one has,
-![\\gamma_1=-0.10](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cgamma_1%3D-0.10 "\gamma_1=-0.10")
-and
-![\\gamma_2=0.25](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cgamma_2%3D0.25 "\gamma_2=0.25").
-Finally, the table ends by showing the elapsed wall clock time required
-by the `lpsmc()` routine in seconds. Let us now see how the
-(approximate) posterior of the (log) penalty parameter looks like by
-using the `postpendist()` routine:
+setting, the coefficients of the incidence part are $\beta_0=0.70$,
+$\beta_1=-1.15$ and $\beta_2=0.95$. For the latency part one has,
+$\gamma_1=-0.10$ and $\gamma_2=0.25$. Finally, the table ends by showing
+the elapsed wall clock time required by the `lpsmc()` routine in
+seconds. Let us now see how the (approximate) posterior of the (log)
+penalty parameter looks like by using the `postpendist()` routine:
 
 ``` r
 postpendist(fit, low = 8, up = 15, themetype = "gray")
@@ -234,20 +226,20 @@ fitMLWG
     ##                                   (Incidence)                    
     ## ------------------------------------------------------------------------------------------ 
     ##             Estimate     sd CI90%.low CI90.up% CI95%.low CI95%.up
-    ## (Intercept)    0.777  0.230     0.412    1.155     0.336    1.248
-    ## x1            -1.347  0.224    -1.727   -1.001    -1.834   -0.942
-    ## x2             1.146  0.368     0.531    1.772     0.427    1.854
+    ## (Intercept)    0.778  0.235     0.409    1.175     0.325    1.256
+    ## x1            -1.344  0.217    -1.719   -1.007    -1.791   -0.955
+    ## x2             1.150  0.369     0.553    1.756     0.438    1.884
     ## ------------------------------------------------------------------------------------------ 
     ##                                    (Latency)                     
     ## ------------------------------------------------------------------------------------------ 
     ##    Estimate     sd CI90%.low CI90.up% CI95%.low CI95%.up
-    ## z1   -0.177  0.086    -0.316   -0.034    -0.340   -0.004
-    ## z2    0.463  0.157     0.202    0.717     0.133    0.766
+    ## z1   -0.176  0.087    -0.318   -0.030    -0.348   -0.005
+    ## z2    0.461  0.157     0.198    0.721     0.150    0.760
     ## ------------------------------------------------------------------------------------------ 
-    ## 'Real' elapsed time: 40.29 seconds
+    ## 'Real' elapsed time: 45.45 seconds
     ## MCMC chain length: 15000
     ## Burn-in length: 5000
-    ## MCMC acceptance rate: 56.08%.
+    ## MCMC acceptance rate: 57.087%.
 
 To get the traceplots of the regression coefficients of the incidence
 part (and the roughness penalty parameter), type the following lines:
@@ -268,10 +260,8 @@ To check that the generated chains have converged, we look at the Geweke
 diagnostics of the latent variables (and the hyperparameters). Here in
 total, we have 18 blue points (11 B-splines plus 5 regression
 coefficients plus 2 hyperparameters). All of the Geweke z-scores are
-within the
-![(-1.96,1.96)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%28-1.96%2C1.96%29 "(-1.96,1.96)")
-range (red dotted horizontal lines), which is a good sign of
-convergence.
+within the $(-1.96,1.96)$ range (red dotted horizontal lines), which is
+a good sign of convergence.
 
 ``` r
 plot(fitMLWG$Geweke,type="p", pch=8, col="blue", ylim=c(-2.5,2.5),
@@ -287,11 +277,9 @@ To assess the statistical performance of the methodology underlying the
 algorithms, the `simlpsmc()` routine can be used to simulate datasets in
 an iterative way and compute some metrics to assess how precise the
 model fit is. The code below simulates `S=500` replications of samples
-of size
-![300](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;300 "300")
-and for each iteration fits a mixture cure model with `lpsmc()`. A table
-with the desired metrics to check the performance summarizes the
-simulations.
+of size $300$ and for each iteration fits a mixture cure model with
+`lpsmc()`. A table with the desired metrics to check the performance
+summarizes the simulations.
 
 ``` r
 S <- 500
@@ -326,7 +314,7 @@ sims <- simlpsmc(n = 300, scenario = 1, S = S, themetype = "classic")
     ## CP90%  78.8 88.2 89.0 87.8 87.0 91.0 93.2 89.6 72.0 18.6
     ## CP95%  87.6 93.0 93.6 94.0 94.8 97.0 97.6 93.6 82.0 27.4
     ## ------------------------------------------------------------------------------------------ 
-    ## Total elapsed time: 227.56 seconds.
+    ## Total elapsed time: 232.38 seconds.
 
 The above table shows the simulation results associated with the
 regression coefficients (table on top) and also the estimated (90% and
@@ -334,7 +322,7 @@ regression coefficients (table on top) and also the estimated (90% and
 survival curve of the uncured respectively at selected quantiles.
 Dividing the total elapsed time by the number of replications allows to
 assess the average time required by the `lpsmc()` routine to fit the
-model (here 0.455 seconds). To show the simulation results associated
+model (here 0.465 seconds). To show the simulation results associated
 with the regression coefficients in a clean table:
 
 ``` r
@@ -363,11 +351,11 @@ gridExtra::grid.arrange(sims$S0plot, sims$ASEplot, nrow = 1)
 
 ## Package version
 
-This is version 1.1.2 (2022-02-04) – “MCMC kicks in again”.
+This is version 1.1.3 (2024-10-30) – “lpsmc inputs”.
 
 ## License
 
-Copyright © 2022 Oswaldo Gressani. All rights reserved.
+Copyright © Oswaldo Gressani. All rights reserved.
 
 ## References
 
